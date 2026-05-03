@@ -27,7 +27,7 @@ import {
 } from "@/components/ui/input-group"
 import { Spinner } from "@/components/ui/spinner"
 import { cn } from "@/lib/utils"
-import { Label } from "../ui/label"
+import { Label } from "@/components/ui/label"
 import { MagicLinkButton } from "./magic-link-button"
 import { ProviderButtons, type SocialLayout } from "./provider-buttons"
 
@@ -101,11 +101,10 @@ export function SignUp({
     }
   }
 
-  const { mutate: signUpEmail, isPending: signUpPending } = useSignUpEmail({
+  const { mutateAsync: signUpEmail, isPending: signUpPending } = useSignUpEmail({
     onError: (error) => {
       setPassword("")
       setConfirmPassword("")
-      toast.error(error.error?.message || error.message)
     },
     onSuccess: () => {
       if (emailAndPassword?.requireEmailVerification) {
@@ -144,7 +143,7 @@ export function SignUp({
       return
     }
 
-    signUpEmail({
+    const promise = signUpEmail({
       name,
       email,
       password,
@@ -156,6 +155,12 @@ export function SignUp({
               : {})
           }
         : {})
+    })
+
+    toast.promise(promise, {
+      loading: "Creating account...",
+      success: "Account created successfully!",
+      error: (error) => error.error?.message || error.message || "Failed to create account"
     })
   }
 
@@ -473,6 +478,7 @@ export function SignUp({
               {localization.auth.alreadyHaveAnAccount}{" "}
               <Link
                 href={`${basePaths.auth}/${viewPaths.auth.signIn}`}
+                // href={`${viewPaths.auth.signIn}`}
                 className="underline underline-offset-4"
               >
                 {localization.auth.signIn}

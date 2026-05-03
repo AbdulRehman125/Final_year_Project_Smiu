@@ -16,7 +16,7 @@ import {
 import { Input } from "@/components/ui/input"
 import { Spinner } from "@/components/ui/spinner"
 import { cn } from "@/lib/utils"
-import { Label } from "../ui/label"
+import { Label } from "@/components/ui/label"
 import { MagicLinkButton } from "./magic-link-button"
 import { PasskeyButton } from "./passkey-button"
 import { ProviderButtons, type SocialLayout } from "./provider-buttons"

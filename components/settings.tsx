@@ -6,8 +6,8 @@ import { useMemo } from "react"
 
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { cn } from "@/lib/utils"
-import { AccountSettings } from "./account/account-settings"
-import { SecuritySettings } from "./security/security-settings"
+import { AccountSettings } from "./account-settings"
+import { SecuritySettings } from "./security-settings"
 
 export type SettingsProps = {
   className?: string

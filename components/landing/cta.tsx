@@ -2,8 +2,13 @@
 
 import { motion } from "motion/react";
 import { Button } from "@/components/ui/button";
+import Link from "next/link";
+import { useSession } from "@/lib/auth-client";
+import { ArrowRight } from "lucide-react";
 
 export function CTA() {
+  const { data: session } = useSession();
+
   return (
     <section className="py-24 bg-background px-4 md:px-6">
       <div className="container mx-auto">
@@ -32,12 +37,22 @@ export function CTA() {
             </p>
             
             <div className="flex flex-col sm:flex-row justify-center gap-4 pt-4">
-              <Button size="lg" className="rounded-full px-8 text-base shadow-lg shadow-primary/20">
-                Get Started Free
-              </Button>
-              <Button size="lg" variant="outline" className="rounded-full px-8 text-base bg-background/50 backdrop-blur">
-                Log In
-              </Button>
+              {session ? (
+                <Button size="lg" className="rounded-full px-8 text-base shadow-lg shadow-primary/20" asChild>
+                  <Link href="/dashboard">
+                    Go to Dashboard <ArrowRight className="ml-2 h-4 w-4" />
+                  </Link>
+                </Button>
+              ) : (
+                <>
+                  <Button size="lg" className="rounded-full px-8 text-base shadow-lg shadow-primary/20" asChild>
+                    <Link href="/sign-up">Get Started Free</Link>
+                  </Button>
+                  <Button size="lg" variant="outline" className="rounded-full px-8 text-base bg-background/50 backdrop-blur" asChild>
+                    <Link href="/sign-in">Log In</Link>
+                  </Button>
+                </>
+              )}
             </div>
           </div>
         </motion.div>

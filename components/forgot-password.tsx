@@ -15,7 +15,7 @@ import {
 import { Input } from "@/components/ui/input"
 import { Spinner } from "@/components/ui/spinner"
 import { cn } from "@/lib/utils"
-import { Label } from "../ui/label"
+import { Label } from "@/components/ui/label"
 
 export type ForgotPasswordProps = {
   className?: string
@@ -33,14 +33,25 @@ export type ForgotPasswordProps = {
 export function ForgotPassword({ className }: ForgotPasswordProps) {
   const { basePaths, localization, viewPaths, Link } = useAuth()
 
-  const { mutate: requestPasswordReset, isPending } = useRequestPasswordReset({
-    onSuccess: () => toast.success(localization.auth.passwordResetEmailSent)
+  const { mutateAsync: requestPasswordReset, isPending } = useRequestPasswordReset({
+    onSuccess: () => {
+      // Side effects like navigation can stay here, but success toast is handled by promise
+    }
   })
 
   function handleSubmit(e: SyntheticEvent<HTMLFormElement>) {
     e.preventDefault()
     const formData = new FormData(e.currentTarget)
-    requestPasswordReset({ email: formData.get("email") as string })
+    const promise = requestPasswordReset({ 
+      email: formData.get("email") as string,
+      redirectTo: "/reset-password"
+    })
+
+    toast.promise(promise, {
+      loading: "Sending reset link...",
+      success: "Reset link sent to your email!",
+      error: (error) => error.error?.message || error.message || "Failed to send reset link"
+    })
   }
 
   const [fieldErrors, setFieldErrors] = useState<{
@@ -103,6 +114,7 @@ export function ForgotPassword({ className }: ForgotPasswordProps) {
           <FieldDescription className="text-center">
             {localization.auth.rememberYourPassword}{" "}
             <Link
+              // href={`${viewPaths.auth.signIn}`}
               href={`${basePaths.auth}/${viewPaths.auth.signIn}`}
               className="underline underline-offset-4"
             >

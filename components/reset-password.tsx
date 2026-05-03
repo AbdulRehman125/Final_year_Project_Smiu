@@ -21,7 +21,7 @@ import {
 } from "@/components/ui/input-group"
 import { Spinner } from "@/components/ui/spinner"
 import { cn } from "@/lib/utils"
-import { Label } from "../ui/label"
+import { Label } from "@/components/ui/label"
 
 export type ResetPasswordProps = {
   className?: string
@@ -44,9 +44,8 @@ export function ResetPassword({ className }: ResetPasswordProps) {
     Link
   } = useAuth()
 
-  const { mutate: resetPassword, isPending } = useResetPassword({
+  const { mutateAsync: resetPassword, isPending } = useResetPassword({
     onSuccess: () => {
-      toast.success(localization.auth.passwordResetSuccess)
       navigate({ to: `${basePaths.auth}/${viewPaths.auth.signIn}` })
     }
   })
@@ -96,7 +95,13 @@ export function ResetPassword({ className }: ResetPasswordProps) {
       return
     }
 
-    resetPassword({ token, newPassword: password })
+    const promise = resetPassword({ token, newPassword: password })
+
+    toast.promise(promise, {
+      loading: "Resetting password...",
+      success: "Password reset successfully!",
+      error: (error) => error.error?.message || error.message || "Failed to reset password"
+    })
   }
 
   return (

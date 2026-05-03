@@ -20,7 +20,7 @@ export type SignOutProps = {
 export function SignOut({ className }: SignOutProps) {
   const { basePaths, navigate, viewPaths } = useAuth()
 
-  const { mutate: signOut } = useSignOut({
+  const { mutateAsync: signOut } = useSignOut({
     onError: (error) => {
       toast.error(error.error?.message || error.message)
 
@@ -29,11 +29,13 @@ export function SignOut({ className }: SignOutProps) {
         replace: true
       })
     },
-    onSuccess: () =>
+    onSuccess: () => {
+      toast.success("Signed out successfully")
       navigate({
         to: `${basePaths.auth}/${viewPaths.auth.signIn}`,
         replace: true
       })
+    }
   })
 
   const hasSignedOut = useRef(false)

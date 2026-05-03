@@ -71,7 +71,7 @@ export function SignIn({
     onSuccess: () => toast.success(localization.auth.verificationEmailSent)
   })
 
-  const { mutate: signInEmail, isPending: signInEmailPending } = useSignInEmail(
+  const { mutateAsync: signInEmail, isPending: signInEmailPending } = useSignInEmail(
     {
       onError: (error, { email }) => {
         setPassword("")
@@ -87,19 +87,16 @@ export function SignIn({
                 })
             }
           })
-        } else {
-          toast.error(error.error?.message || error.message)
         }
       },
       onSuccess: () => navigate({ to: redirectTo })
     }
   )
 
-  const { mutate: signInUsername, isPending: signInUsernamePending } =
+  const { mutateAsync: signInUsername, isPending: signInUsernamePending } =
     useSignInUsername({
-      onError: (error) => {
+      onError: () => {
         setPassword("")
-        toast.error(error.error?.message || error.message)
       },
       onSuccess: () => navigate({ to: redirectTo })
     })
@@ -118,18 +115,19 @@ export function SignIn({
     const email = formData.get("email") as string
     const rememberMe = formData.get("rememberMe") === "on"
 
-    if (usernameConfig?.enabled && !isEmail(email)) {
-      signInUsername({
-        username: email,
-        password
-      })
-    } else {
-      signInEmail({
-        email,
-        password,
-        ...(emailAndPassword?.rememberMe ? { rememberMe } : {})
-      })
-    }
+    const promise = (usernameConfig?.enabled && !isEmail(email)) 
+      ? signInUsername({ username: email, password })
+      : signInEmail({
+          email,
+          password,
+          ...(emailAndPassword?.rememberMe ? { rememberMe } : {})
+        });
+
+    toast.promise(promise, {
+      loading: "Signing in...",
+      success: "Successfully signed in!",
+      error: (error) => error.error?.message || error.message || "Failed to sign in"
+    })
   }
 
   const showSeparator =
@@ -300,6 +298,7 @@ export function SignIn({
         <div className="flex flex-col gap-3 items-center w-full mt-4">
           {emailAndPassword?.forgotPassword && (
             <Link
+              // href={`${viewPaths.auth.forgotPassword}`}
               href={`${basePaths.auth}/${viewPaths.auth.forgotPassword}`}
               className="self-center text-sm underline-offset-4 hover:underline"
             >
@@ -311,6 +310,7 @@ export function SignIn({
             <FieldDescription className="text-center">
               {localization.auth.needToCreateAnAccount}{" "}
               <Link
+                // href={`${viewPaths.auth.signUp}`}
                 href={`${basePaths.auth}/${viewPaths.auth.signUp}`}
                 className="underline underline-offset-4"
               >
