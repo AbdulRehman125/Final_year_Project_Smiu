@@ -1,0 +1,40 @@
+# AI-IELTS Backend — Requirements
+# Install: pip install -r requirements.txt
+
+# Web Framework
+fastapi
+uvicorn[standard]
+
+# LangChain — Agent Framework
+langchain
+langchain-core
+# langchain-anthropic
+langchain-groq
+
+# Anthropic SDK
+anthropic
+
+# Data Validation
+pydantic
+pydantic-settings
+
+# Environment Variables
+python-dotenv
+
+# HTTP Client
+httpx
+
+# CORS
+python-multipart
+
+# Database
+prisma
+
+# Async
+anyio
+
+# Logging
+loguru
+
+# JSON
+orjson
