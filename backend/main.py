@@ -64,6 +64,7 @@ from loguru import logger
 from routes.writing import router as writing_router
 from routes.questions import router as questions_router
 from core.config import settings
+from routes.speaking_ws import router as speaking_router
 
 
 @asynccontextmanager
@@ -90,6 +91,8 @@ app.add_middleware(
 
 app.include_router(writing_router,   prefix="/api/writing",   tags=["Writing Evaluation"])
 app.include_router(questions_router, prefix="/api/questions", tags=["Question Generator"])
+app.include_router(speaking_router)
+
 
 
 @app.get("/health")

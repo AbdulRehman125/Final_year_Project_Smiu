@@ -135,24 +135,479 @@
 
 
 
+// // lib/writing-types.ts
+
+// export type TestType = "academic" | "general"
+
+// export type Task1ChartType =
+//   | "line_graph" | "bar_chart" | "pie_chart"
+//   | "table" | "process_diagram" | "map" | "letter"
+
+// export type Task2EssayType =
+//   | "opinion" | "discussion" | "advantage_disadvantage"
+//   | "problem_solution" | "two_part"
+
+// export interface Task1Question {
+//   id: string
+//   chart_type: Task1ChartType
+//   image_url: string
+//   prompt_text: string
+//   description: string
+//   test_type: string
+// }
+
+// export interface Task2Question {
+//   id: string
+//   essay_type: Task2EssayType
+//   prompt_text: string
+// }
+
+// export interface GeneratedWritingQuestions {
+//   test_type: TestType
+//   task1: Task1Question
+//   task2: Task2Question
+// }
+
+// export interface WritingError {
+//   error_type: "grammar" | "vocabulary" | "coherence" | "task"
+//   original: string
+//   correction: string
+//   rule: string
+//   position?: string
+// }
+
+// export interface TaskScore {
+//   band_task_achievement: number
+//   band_coherence_cohesion: number
+//   band_lexical_resource: number
+//   band_grammatical_range: number
+//   overall_band: number
+//   feedback_task_achievement: string
+//   feedback_coherence_cohesion: string
+//   feedback_lexical_resource: string
+//   feedback_grammatical_range: string
+//   errors: WritingError[]
+//   word_count: number
+//   word_count_sufficient: boolean
+//   strengths: string[]
+//   improvements: string[]
+// }
+
+// export interface WritingEvaluationResponse {
+//   task1_score: TaskScore
+//   task2_score: TaskScore
+//   overall_writing_band: number
+//   test_type: TestType
+//   time_taken_seconds: number
+//   summary: string
+//   strengths: string[]
+//   improvements: string[]
+//   ai_detection: WritingAIDetection
+// }
+
+// // ── API Base URL ────────────────────────────────
+
+// const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:8000"
+
+// // ── Fetch Questions from LLM Agent ─────────────
+
+// export async function fetchWritingQuestions(
+//   testType: TestType
+// ): Promise<GeneratedWritingQuestions> {
+//   const res = await fetch(
+//     `${BACKEND_URL}/api/questions/generate?test_type=${testType}`,
+//     { cache: "no-store" }   // Always fresh — no caching
+//   )
+//   if (!res.ok) throw new Error("Failed to generate questions")
+//   return res.json()
+// }
+
+// // ── Submit for Evaluation ───────────────────────
+
+// export async function evaluateWriting(payload: {
+//   test_type: TestType
+//   task1_question: Task1Question
+//   task2_question: Task2Question
+//   task1_response: string
+//   task2_response: string
+//   time_taken_seconds: number
+// }): Promise<WritingEvaluationResponse> {
+//   const res = await fetch(`${BACKEND_URL}/api/writing/evaluate`, {
+//     method: "POST",
+//     headers: { "Content-Type": "application/json" },
+//     body: JSON.stringify(payload),
+//   })
+//   if (!res.ok) throw new Error("Evaluation failed")
+//   return res.json()
+// }
+
+// // ── Helpers ─────────────────────────────────────
+
+// export function bandToLabel(band: number): string {
+//   if (band >= 9) return "Expert"
+//   if (band >= 8) return "Very Good"
+//   if (band >= 7) return "Good"
+//   if (band >= 6) return "Competent"
+//   if (band >= 5) return "Modest"
+//   if (band >= 4) return "Limited"
+//   return "Extremely Limited"
+// }
+
+// export function bandToColor(band: number): string {
+//   if (band >= 7) return "text-emerald-400"
+//   if (band >= 6) return "text-blue-400"
+//   if (band >= 5) return "text-amber-400"
+//   return "text-red-400"
+// }
+
+
+
+// // ─────────────────────────────────────────────────────────────
+// // Add these types to your existing `lib/writing-types.ts`.
+// // I don't have your current copy of that file, so I'm giving you
+// // the exact addition rather than guessing and overwriting it.
+// //
+// // Mirrors the new backend schema in schemas/writing_schema.py:
+// //   AIDetectionResult, WritingAIDetection
+// // ─────────────────────────────────────────────────────────────
+
+// export type AILikelihood = "low" | "medium" | "high"
+
+// export interface AIDetectionResult {
+//   likelihood: AILikelihood
+//   confidence_score: number // 0.0 - 1.0
+//   reasoning: string
+//   indicators: string[]
+// }
+
+// export interface WritingAIDetection {
+//   task1: AIDetectionResult
+//   task2: AIDetectionResult
+//   overall_likelihood: AILikelihood
+//   overall_confidence_score: number // 0.0 - 1.0
+// }
+
+// // Then update your existing WritingEvaluationResponse interface
+// // to include the new required field:
+// //
+// // export interface WritingEvaluationResponse {
+// //   task1_score: TaskScore
+// //   task2_score: TaskScore
+// //   overall_writing_band: number
+// //   test_type: TestType
+// //   time_taken_seconds: number
+// //   summary: string
+// //   strengths: string[]
+// //   improvements: string[]
+// //   ai_detection: WritingAIDetection   // ← ADD THIS LINE
+// // }
+
+
+
+
+
+
+
+
+
+
+// // ─────────────────────────────────────────────────────────────
+// // Add/update these types in your existing `lib/writing-types.ts`.
+// // I don't have your current copy of that file, so I'm giving you
+// // the exact additions rather than guessing and overwriting it.
+// // ─────────────────────────────────────────────────────────────
+
+// // ── 1. AI-content detection (from previous round) ──────────────
+
+// // export type AILikelihood = "low" | "medium" | "high"
+
+// // export interface AIDetectionResult {
+// //   likelihood: AILikelihood
+// //   confidence_score: number // 0.0 - 1.0
+// //   reasoning: string
+// //   indicators: string[]
+// // }
+
+// // export interface WritingAIDetection {
+// //   task1: AIDetectionResult
+// //   task2: AIDetectionResult
+// //   overall_likelihood: AILikelihood
+// //   overall_confidence_score: number // 0.0 - 1.0
+// // }
+
+// // Update your existing WritingEvaluationResponse interface to include:
+// //   ai_detection: WritingAIDetection   // ← ADD THIS FIELD
+
+// // ── 2. Native Task 1 chart data (new — replaces image_url) ─────
+
+// export interface ChartSeriesData {
+//   name: string
+//   data: number[]
+// }
+
+// export interface Task1ChartData {
+//   chart_type: string // bar_chart | line_graph | pie_chart | table | process_diagram
+//   title: string
+//   unit: string
+//   categories: string[]  // bar/line/pie: axis/slice labels
+//   series: ChartSeriesData[] // bar/line/pie: one or more series
+//   columns: string[]     // table: column headers
+//   rows: string[][]      // table: row values (same length as columns)
+//   steps: string[]       // process_diagram: ordered step descriptions
+// }
+
+// // UPDATE your existing Task1Question interface:
+// // REMOVE:  image_url: string
+// // ADD:     chart_data: Task1ChartData | null   (null for General Training letter task)
+// //
+// // export interface Task1Question {
+// //   id: string
+// //   chart_type: string
+// //   prompt_text: string
+// //   description: string
+// //   chart_data: Task1ChartData | null   // ← REPLACES image_url
+// // }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+// // lib/writing-types.ts
+
+// export type TestType = "academic" | "general"
+
+// export type Task1ChartType =
+//   | "line_graph" | "bar_chart" | "pie_chart"
+//   | "table" | "process_diagram" | "letter"
+
+// export type Task2EssayType =
+//   | "opinion" | "discussion" | "advantage_disadvantage"
+//   | "problem_solution" | "two_part"
+
+// // ── Native Task 1 chart data (replaces image_url) ──────────────
+
+// export interface ChartSeriesData {
+//   name: string
+//   data: number[]
+// }
+
+// export interface Task1ChartData {
+//   chart_type: string // bar_chart | line_graph | pie_chart | table | process_diagram
+//   title: string
+//   unit: string
+//   categories: string[]      // bar/line/pie: axis/slice labels
+//   series: ChartSeriesData[] // bar/line/pie: one or more series
+//   columns: string[]         // table: column headers
+//   rows: string[][]          // table: row values (same length as columns)
+//   steps: string[]           // process_diagram: ordered step descriptions
+// }
+
+// export interface Task1Question {
+//   id: string
+//   chart_type: Task1ChartType
+//   prompt_text: string
+//   description: string
+//   chart_data: Task1ChartData | null // null for General Training (letter) task
+//   test_type: string
+// }
+
+// export interface Task2Question {
+//   id: string
+//   essay_type: Task2EssayType
+//   prompt_text: string
+// }
+
+// export interface GeneratedWritingQuestions {
+//   test_type: TestType
+//   task1: Task1Question
+//   task2: Task2Question
+// }
+
+// export interface WritingError {
+//   error_type: "grammar" | "vocabulary" | "coherence" | "task"
+//   original: string
+//   correction: string
+//   rule: string
+//   position?: string
+// }
+
+// export interface TaskScore {
+//   band_task_achievement: number
+//   band_coherence_cohesion: number
+//   band_lexical_resource: number
+//   band_grammatical_range: number
+//   overall_band: number
+//   feedback_task_achievement: string
+//   feedback_coherence_cohesion: string
+//   feedback_lexical_resource: string
+//   feedback_grammatical_range: string
+//   errors: WritingError[]
+//   word_count: number
+//   word_count_sufficient: boolean
+//   strengths: string[]
+//   improvements: string[]
+// }
+
+// // ── AI-content detection ────────────────────────────────────────
+
+// export type AILikelihood = "low" | "medium" | "high"
+
+// export interface AIDetectionResult {
+//   likelihood: AILikelihood
+//   confidence_score: number // 0.0 - 1.0
+//   reasoning: string
+//   indicators: string[]
+// }
+
+// export interface WritingAIDetection {
+//   task1: AIDetectionResult
+//   task2: AIDetectionResult
+//   overall_likelihood: AILikelihood
+//   overall_confidence_score: number // 0.0 - 1.0
+// }
+
+// export interface WritingEvaluationResponse {
+//   task1_score: TaskScore
+//   task2_score: TaskScore
+//   overall_writing_band: number
+//   test_type: TestType
+//   time_taken_seconds: number
+//   summary: string
+//   strengths: string[]
+//   improvements: string[]
+//   ai_detection: WritingAIDetection
+// }
+
+// // ── API Base URL ────────────────────────────────
+
+// const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:8000"
+
+// // ── Fetch Questions from LLM Agent ─────────────
+
+// export async function fetchWritingQuestions(
+//   testType: TestType
+// ): Promise<GeneratedWritingQuestions> {
+//   const res = await fetch(
+//     `${BACKEND_URL}/api/questions/generate?test_type=${testType}`,
+//     { cache: "no-store" }   // Always fresh — no caching
+//   )
+//   if (!res.ok) throw new Error("Failed to generate questions")
+//   return res.json()
+// }
+
+// // ── Submit for Evaluation ───────────────────────
+
+// export async function evaluateWriting(payload: {
+//   test_type: TestType
+//   task1_question: Task1Question
+//   task2_question: Task2Question
+//   task1_response: string
+//   task2_response: string
+//   time_taken_seconds: number
+// }): Promise<WritingEvaluationResponse> {
+//   const res = await fetch(`${BACKEND_URL}/api/writing/evaluate`, {
+//     method: "POST",
+//     headers: { "Content-Type": "application/json" },
+//     body: JSON.stringify(payload),
+//   })
+//   if (!res.ok) throw new Error("Evaluation failed")
+//   return res.json()
+// }
+
+// // ── Helpers ─────────────────────────────────────
+
+// export function bandToLabel(band: number): string {
+//   if (band >= 9) return "Expert"
+//   if (band >= 8) return "Very Good"
+//   if (band >= 7) return "Good"
+//   if (band >= 6) return "Competent"
+//   if (band >= 5) return "Modest"
+//   if (band >= 4) return "Limited"
+//   return "Extremely Limited"
+// }
+
+// export function bandToColor(band: number): string {
+//   if (band >= 7) return "text-emerald-400"
+//   if (band >= 6) return "text-blue-400"
+//   if (band >= 5) return "text-amber-400"
+//   return "text-red-400"
+// }
+
+
+
+
+
+
+
+
+
+
 // lib/writing-types.ts
 
 export type TestType = "academic" | "general"
 
 export type Task1ChartType =
   | "line_graph" | "bar_chart" | "pie_chart"
-  | "table" | "process_diagram" | "map" | "letter"
+  | "table" | "process_diagram" | "letter"
 
 export type Task2EssayType =
   | "opinion" | "discussion" | "advantage_disadvantage"
   | "problem_solution" | "two_part"
 
+// ── Native Task 1 chart data (replaces image_url) ──────────────
+
+export interface ChartSeriesData {
+  name: string
+  data: number[]
+}
+
+export interface Task1ChartData {
+  chart_type: string // bar_chart | line_graph | pie_chart | table | process_diagram
+  title: string
+  unit: string
+  categories: string[]      // bar/line/pie: axis/slice labels
+  series: ChartSeriesData[] // bar/line/pie: one or more series
+  columns: string[]         // table: column headers
+  rows: string[][]          // table: row values (same length as columns)
+  steps: string[]           // process_diagram: ordered step descriptions
+}
+
 export interface Task1Question {
   id: string
   chart_type: Task1ChartType
-  image_url: string
   prompt_text: string
   description: string
+  chart_data: Task1ChartData | null // null for General Training (letter) task
   test_type: string
 }
 
@@ -193,6 +648,24 @@ export interface TaskScore {
   improvements: string[]
 }
 
+// ── AI-content detection ────────────────────────────────────────
+
+export type AILikelihood = "low" | "medium" | "high"
+
+export interface AIDetectionResult {
+  likelihood: AILikelihood
+  confidence_score: number // 0.0 - 1.0
+  reasoning: string
+  indicators: string[]
+}
+
+export interface WritingAIDetection {
+  task1: AIDetectionResult
+  task2: AIDetectionResult
+  overall_likelihood: AILikelihood
+  overall_confidence_score: number // 0.0 - 1.0
+}
+
 export interface WritingEvaluationResponse {
   task1_score: TaskScore
   task2_score: TaskScore
@@ -202,6 +675,7 @@ export interface WritingEvaluationResponse {
   summary: string
   strengths: string[]
   improvements: string[]
+  ai_detection: WritingAIDetection
 }
 
 // ── API Base URL ────────────────────────────────
@@ -217,7 +691,16 @@ export async function fetchWritingQuestions(
     `${BACKEND_URL}/api/questions/generate?test_type=${testType}`,
     { cache: "no-store" }   // Always fresh — no caching
   )
-  if (!res.ok) throw new Error("Failed to generate questions")
+  if (!res.ok) {
+    let detail = ""
+    try {
+      const errBody = await res.json()
+      detail = errBody?.detail ? JSON.stringify(errBody.detail) : JSON.stringify(errBody)
+    } catch {
+      detail = await res.text().catch(() => "")
+    }
+    throw new Error(`Failed to generate questions (${res.status}): ${detail || res.statusText}`)
+  }
   return res.json()
 }
 
@@ -236,7 +719,19 @@ export async function evaluateWriting(payload: {
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(payload),
   })
-  if (!res.ok) throw new Error("Evaluation failed")
+  if (!res.ok) {
+    // Surface the real backend error (e.g. FastAPI/Pydantic validation
+    // details) instead of a generic message — silent failures here are
+    // impossible to debug from the UI otherwise.
+    let detail = ""
+    try {
+      const errBody = await res.json()
+      detail = errBody?.detail ? JSON.stringify(errBody.detail) : JSON.stringify(errBody)
+    } catch {
+      detail = await res.text().catch(() => "")
+    }
+    throw new Error(`Evaluation failed (${res.status}): ${detail || res.statusText}`)
+  }
   return res.json()
 }
 

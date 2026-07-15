@@ -1,4 +1,19 @@
 # dependencies
+frontend/.env
+backend/.env
+
+*.zip
+
+node_modules/
+
+node_modules/
+frontend/node_modules/
+
+# Next.js build
+.next/
+frontend/.next/
+
+
 /node_modules
 /.pnp
 .pnp.*
