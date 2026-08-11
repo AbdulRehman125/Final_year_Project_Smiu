@@ -52,3 +52,13 @@ export type ReadingTest = Prisma.ReadingTestModel
  * 
  */
 export type ReadingAttempt = Prisma.ReadingAttemptModel
+/**
+ * Model ListeningTest
+ * 
+ */
+export type ListeningTest = Prisma.ListeningTestModel
+/**
+ * Model ListeningAttempt
+ * 
+ */
+export type ListeningAttempt = Prisma.ListeningAttemptModel

@@ -1,5 +1,3 @@
-// frontend/app/api/reading/send-report/route.ts — Send PDF report via Resend
-
 import { NextResponse } from "next/server";
 import { resend } from "@/lib/email";
 
@@ -30,7 +28,7 @@ export async function POST(req: Request) {
         </head>
         <body>
           <div class="header">
-            <h2>IELTS Academic Reading Report</h2>
+            <h2>IELTS Academic Listening Report</h2>
             <p>AI-IELTS Official Assessment Summary</p>
           </div>
 
@@ -41,27 +39,27 @@ export async function POST(req: Request) {
           </div>
 
           <div class="card">
-            <h3>Passage Breakdown</h3>
+            <h3>Section Breakdown</h3>
             <table class="table">
               <thead>
                 <tr>
-                  <th>Passage</th>
+                  <th>Section</th>
                   <th>Difficulty</th>
                   <th>Score</th>
                   <th>Accuracy</th>
                 </tr>
               </thead>
               <tbody>
-                ${(results.passageScores || [])
+                ${(results.sectionScores || [])
                   .map(
-                    (p: any) => {
-                      const pct = p.percentage ?? (p.total > 0 ? (p.correct / p.total) * 100 : 0);
-                      const diff = (p.difficulty || "mixed").toUpperCase();
+                    (s: any) => {
+                      const pct = s.percentage ?? (s.total > 0 ? (s.correct / s.total) * 100 : 0);
+                      const diff = (s.difficulty || "mixed").toUpperCase();
                       return `
                   <tr>
-                    <td>Passage ${(p.passageIndex ?? 0) + 1}</td>
+                    <td>Section ${(s.sectionIndex ?? 0) + 1}</td>
                     <td>${diff}</td>
-                    <td>${p.correct ?? 0} / ${p.total ?? 13}</td>
+                    <td>${s.correct ?? 0} / ${s.total ?? 10}</td>
                     <td>${pct.toFixed(0)}%</td>
                   </tr>
                 `;
@@ -89,7 +87,7 @@ export async function POST(req: Request) {
     const data = await resend.emails.send({
       from: "AI IELTS <onboarding@resend.dev>",
       to: email,
-      subject: `Your IELTS Reading Test Report (Band ${results.bandScore.toFixed(1)})`,
+      subject: `Your IELTS Listening Test Report (Band ${results.bandScore.toFixed(1)})`,
       html: htmlContent,
     });
 

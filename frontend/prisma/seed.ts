@@ -363,6 +363,38 @@ async function main() {
     console.log(`✅ Seeded Reading Test: ${test.title}`);
   }
 
+  // ── Listening Tests ─────────────────────────
+  console.log("\n🎧 Seeding IELTS Listening tests...");
+  const { FALLBACK_LISTENING_TESTS } = await import("@/lib/listening-fallback-tests");
+
+  for (const test of FALLBACK_LISTENING_TESTS) {
+    await db.listeningTest.upsert({
+      where: { id: test.id || "seed-listening-test-1" },
+      update: {
+        title: test.title,
+        difficulty: test.difficulty,
+        sections: test.sections as any,
+        questions: test.questions as any,
+        topics: test.topics,
+        totalQuestions: test.totalQuestions,
+        audioUrls: test.audioUrls as any,
+        transcripts: test.transcripts as any,
+      },
+      create: {
+        id: test.id || "seed-listening-test-1",
+        title: test.title,
+        difficulty: test.difficulty,
+        sections: test.sections as any,
+        questions: test.questions as any,
+        topics: test.topics,
+        totalQuestions: test.totalQuestions,
+        audioUrls: test.audioUrls as any,
+        transcripts: test.transcripts as any,
+      },
+    });
+    console.log(`✅ Seeded Listening Test: ${test.title}`);
+  }
+
   console.log("🌳 Seeding complete.");
 }
 

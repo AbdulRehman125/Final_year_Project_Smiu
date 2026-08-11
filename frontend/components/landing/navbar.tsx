@@ -311,9 +311,9 @@ export function Navbar() {
 
                 <DropdownMenuSeparator />
 
-                <DropdownMenuItem asChild>
+                {/* <DropdownMenuItem asChild>
                   <Link href="/dashboard">Dashboard</Link>
-                </DropdownMenuItem>
+                </DropdownMenuItem> */}
 
                 <DropdownMenuSeparator />
 

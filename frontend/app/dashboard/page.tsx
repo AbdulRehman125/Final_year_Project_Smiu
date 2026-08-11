@@ -105,6 +105,29 @@ export default function DashboardPage() {
             </a>
           </CardContent>
         </Card>
+
+        {/* Listening Module Card */}
+        <Card className="hover:shadow-md transition-shadow border-border">
+          <CardHeader>
+            <CardTitle className="flex items-center justify-between">
+              <span>🎧 Listening Test</span>
+              <span className="text-xs px-2.5 py-0.5 rounded-full bg-muted text-muted-foreground font-bold">
+                30 Min
+              </span>
+            </CardTitle>
+            <CardDescription>
+              Listen to 4 sections and answer 40 questions with AI scoring.
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <a
+              href="/listening"
+              className="inline-flex items-center justify-center w-full h-10 rounded-xl bg-muted text-foreground font-semibold text-sm hover:bg-muted/80 transition-colors"
+            >
+              Start Listening Test →
+            </a>
+          </CardContent>
+        </Card>
       </div>
     </div>
   );

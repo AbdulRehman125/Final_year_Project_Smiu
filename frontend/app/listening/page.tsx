@@ -1,10 +1,10 @@
 "use client";
 
-// app/reading/page.tsx — Reading Module Instructions Page
+// app/listening/page.tsx — Listening Module Instructions Page
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { Clock, BookOpen, AlertCircle, CheckCircle2, ChevronRight, WifiOff, FileText } from "lucide-react";
+import { Clock, Headphones, AlertCircle, CheckCircle2, ChevronRight, WifiOff } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ErrorModal } from "@/components/writing/error-modal";
 import type { Banner } from "@/lib/reading-network-utils";
@@ -12,15 +12,15 @@ import type { Banner } from "@/lib/reading-network-utils";
 import { useSession } from "@/lib/auth-client";
 
 const rules = [
-  { icon: CheckCircle2, text: "3 Passages (Easy, Moderate, Hard)", ok: true },
-  { icon: CheckCircle2, text: "Total 40 Questions (13 + 14 + 13)", ok: true },
-  { icon: CheckCircle2, text: "Multiple question formats (MCQ, T/F/NG, etc.)", ok: true },
-  { icon: AlertCircle, text: "No extra transfer time at the end", ok: false },
-  { icon: AlertCircle, text: "Spelling and grammar count", ok: false },
-  { icon: AlertCircle, text: "Auto-submits when the 60-min timer ends", ok: false },
+  { icon: CheckCircle2, text: "4 Sections (Everyday → Academic)", ok: true },
+  { icon: CheckCircle2, text: "Total 40 Questions (10 per section)", ok: true },
+  { icon: CheckCircle2, text: "Multiple question formats (MCQ, Matching, Completion)", ok: true },
+  { icon: AlertCircle, text: "Audio plays ONCE — listen carefully", ok: false },
+  { icon: AlertCircle, text: "No pause/rewind during real IELTS", ok: false },
+  { icon: AlertCircle, text: "Auto-submits when the 30-min timer ends", ok: false },
 ];
 
-export default function ReadingInstructionsPage() {
+export default function ListeningInstructionsPage() {
   const router = useRouter();
   const { data: session, isPending } = useSession();
   const [banner, setBanner] = useState<Banner | null>(null);
@@ -50,14 +50,14 @@ export default function ReadingInstructionsPage() {
         kind: "warning",
         title: "You're offline",
         message:
-          "The reading test needs an internet connection to load questions and submit answers. Please reconnect before continuing.",
+          "The listening test needs an internet connection to load questions and submit answers. Please reconnect before continuing.",
         action: { label: "Try again", run: () => { setBanner(null); handleContinue(); } },
       });
       return;
     }
 
     try {
-      router.push("/reading/test?fresh=true");
+      router.push("/listening/test?fresh=true");
     } catch (e) {
       console.warn("Navigation failed", e);
       setBanner({
@@ -75,10 +75,10 @@ export default function ReadingInstructionsPage() {
         {/* Header */}
         <div className="text-center mb-6">
           <div className="inline-flex items-center gap-1.5 bg-primary/10 text-primary px-3 py-1 rounded-full text-xs font-medium mb-3">
-            <BookOpen className="w-3.5 h-3.5" />
-            IELTS Academic Reading
+            <Headphones className="w-3.5 h-3.5" />
+            IELTS Academic Listening
           </div>
-          <h1 className="text-2xl font-bold text-foreground mb-1">Reading Test</h1>
+          <h1 className="text-2xl font-bold text-foreground mb-1">Listening Test</h1>
           <p className="text-muted-foreground text-sm">
             Read the instructions carefully before you begin.
           </p>
@@ -89,22 +89,22 @@ export default function ReadingInstructionsPage() {
           )}
         </div>
 
-        {/* Timer + Passages + Questions — summary row */}
+        {/* Timer + Sections + Questions — summary row */}
         <div className="grid grid-cols-3 gap-3 mb-5">
           <div className="bg-primary/5 border border-primary/20 rounded-2xl p-4 flex flex-col items-center justify-center text-center">
             <Clock className="w-5 h-5 text-primary mb-1.5" />
-            <p className="text-lg font-bold text-foreground leading-tight">60 Min</p>
+            <p className="text-lg font-bold text-foreground leading-tight">30 Min</p>
             <p className="text-[11px] text-muted-foreground leading-tight">Total time</p>
           </div>
           <div className="bg-card border border-border rounded-2xl p-4 text-center">
-            <div className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider mb-1">Passages</div>
-            <div className="text-lg font-bold text-foreground leading-tight">3</div>
-            <div className="text-[11px] text-muted-foreground">Easy → Hard</div>
+            <div className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider mb-1">Sections</div>
+            <div className="text-lg font-bold text-foreground leading-tight">4</div>
+            <div className="text-[11px] text-muted-foreground">Everyday → Academic</div>
           </div>
           <div className="bg-card border border-border rounded-2xl p-4 text-center">
             <div className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider mb-1">Questions</div>
             <div className="text-lg font-bold text-foreground leading-tight">40</div>
-            <div className="text-[11px] text-muted-foreground">13 + 14 + 13</div>
+            <div className="text-[11px] text-muted-foreground">10 + 10 + 10 + 10</div>
           </div>
         </div>
 
@@ -129,7 +129,7 @@ export default function ReadingInstructionsPage() {
           className="w-full h-12 text-sm font-semibold rounded-xl"
           onClick={handleContinue}
         >
-          Start Reading Test
+          Start Listening Test
           <ChevronRight className="w-4 h-4 ml-2" />
         </Button>
       </div>

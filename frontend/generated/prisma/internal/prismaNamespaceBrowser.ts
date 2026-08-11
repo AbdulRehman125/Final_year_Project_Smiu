@@ -57,7 +57,9 @@ export const ModelName = {
   Verification: 'Verification',
   WritingTask1Image: 'WritingTask1Image',
   ReadingTest: 'ReadingTest',
-  ReadingAttempt: 'ReadingAttempt'
+  ReadingAttempt: 'ReadingAttempt',
+  ListeningTest: 'ListeningTest',
+  ListeningAttempt: 'ListeningAttempt'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -183,6 +185,45 @@ export const ReadingAttemptScalarFieldEnum = {
 } as const
 
 export type ReadingAttemptScalarFieldEnum = (typeof ReadingAttemptScalarFieldEnum)[keyof typeof ReadingAttemptScalarFieldEnum]
+
+
+export const ListeningTestScalarFieldEnum = {
+  id: 'id',
+  title: 'title',
+  difficulty: 'difficulty',
+  sections: 'sections',
+  questions: 'questions',
+  audioUrls: 'audioUrls',
+  transcripts: 'transcripts',
+  topics: 'topics',
+  totalQuestions: 'totalQuestions',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type ListeningTestScalarFieldEnum = (typeof ListeningTestScalarFieldEnum)[keyof typeof ListeningTestScalarFieldEnum]
+
+
+export const ListeningAttemptScalarFieldEnum = {
+  id: 'id',
+  userId: 'userId',
+  testId: 'testId',
+  answers: 'answers',
+  score: 'score',
+  bandScore: 'bandScore',
+  accuracy: 'accuracy',
+  timeTakenSeconds: 'timeTakenSeconds',
+  sectionScores: 'sectionScores',
+  questionTypeScores: 'questionTypeScores',
+  timePerSection: 'timePerSection',
+  recommendations: 'recommendations',
+  reportSentAt: 'reportSentAt',
+  startedAt: 'startedAt',
+  completedAt: 'completedAt',
+  createdAt: 'createdAt'
+} as const
+
+export type ListeningAttemptScalarFieldEnum = (typeof ListeningAttemptScalarFieldEnum)[keyof typeof ListeningAttemptScalarFieldEnum]
 
 
 export const SortOrder = {

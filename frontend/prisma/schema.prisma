@@ -18,6 +18,7 @@ model User {
   sessions      Session[]
   accounts      Account[]
   readingAttempts ReadingAttempt[]
+  listeningAttempts ListeningAttempt[]
 
   @@map("user")
 }
@@ -117,3 +118,41 @@ model ReadingAttempt {
 
   @@map("reading_attempt")
 }
+
+model ListeningTest {
+  id             String   @id @default(cuid())
+  title          String
+  difficulty     String   @default("mixed")
+  sections       Json
+  questions      Json
+  audioUrls      Json
+  transcripts    Json
+  topics         String[]
+  totalQuestions Int      @default(40)
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  attempts       ListeningAttempt[]
+}
+
+model ListeningAttempt {
+  id                 String   @id @default(cuid())
+  userId             String?
+  testId             String
+  answers            Json
+  score              Int
+  bandScore          Float
+  accuracy           Float
+  timeTakenSeconds   Int
+  sectionScores      Json
+  questionTypeScores Json
+  timePerSection     Json?
+  recommendations    String[]
+  reportSentAt       DateTime?
+  startedAt          DateTime @default(now())
+  completedAt        DateTime?
+  createdAt          DateTime @default(now())
+
+  user  User?          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  test  ListeningTest  @relation(fields: [testId], references: [id], onDelete: Cascade)
+}

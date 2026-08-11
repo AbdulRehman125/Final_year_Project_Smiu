@@ -64,6 +64,7 @@ from loguru import logger
 from routes.writing import router as writing_router
 from routes.questions import router as questions_router
 from routes.reading import router as reading_router
+from routes.listening import router as listening_router
 from core.config import settings
 from routes.speaking_ws import router as speaking_router
 
@@ -93,6 +94,7 @@ app.add_middleware(
 app.include_router(writing_router,   prefix="/api/writing",   tags=["Writing Evaluation"])
 app.include_router(questions_router, prefix="/api/questions", tags=["Question Generator"])
 app.include_router(reading_router,   prefix="/api/reading",   tags=["Reading Module"])
+app.include_router(listening_router, prefix="/api/listening", tags=["Listening Module"])
 app.include_router(speaking_router)
 
 

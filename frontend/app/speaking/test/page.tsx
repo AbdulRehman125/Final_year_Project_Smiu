@@ -1290,8 +1290,18 @@ function LiveMicWave({ level }: { level: number }) {
   );
 }
 
+import { useSession } from "@/lib/auth-client";
+
 export default function SpeakingTestPage() {
   const router = useRouter();
+  const { data: session, isPending } = useSession();
+
+  useEffect(() => {
+    if (!isPending && !session?.user) {
+      router.replace("/auth/sign-in");
+    }
+  }, [session, isPending, router]);
+
   const sessionId = useRef(`session_${Date.now()}`);
 
   const ws = useRef<WebSocket | null>(null);

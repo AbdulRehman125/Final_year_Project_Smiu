@@ -615,15 +615,20 @@ const types = [
   },
 ]
 
+import { useSession } from "@/lib/auth-client"
+
 export default function SelectTypePage() {
   const router = useRouter()
+  const { data: session, isPending } = useSession()
   const [selected, setSelected] = useState<TestType | null>(null)
   const [banner, setBanner] = useState<Banner | null>(null)
 
-  // Same reasoning as the instructions page: never branch render output on
-  // navigator.onLine directly (server has no navigator at all) — track it
-  // via state that only updates after mount, so SSR and the first client
-  // render always agree.
+  useEffect(() => {
+    if (!isPending && !session?.user) {
+      router.replace("/auth/sign-in")
+    }
+  }, [session, isPending, router])
+
   const [isOnline, setIsOnline] = useState(true)
   useEffect(() => {
     setIsOnline(navigator.onLine)

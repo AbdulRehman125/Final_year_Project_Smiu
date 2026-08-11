@@ -209,6 +209,7 @@ export type UserWhereInput = {
   sessions?: Prisma.SessionListRelationFilter
   accounts?: Prisma.AccountListRelationFilter
   readingAttempts?: Prisma.ReadingAttemptListRelationFilter
+  listeningAttempts?: Prisma.ListeningAttemptListRelationFilter
 }
 
 export type UserOrderByWithRelationInput = {
@@ -223,6 +224,7 @@ export type UserOrderByWithRelationInput = {
   sessions?: Prisma.SessionOrderByRelationAggregateInput
   accounts?: Prisma.AccountOrderByRelationAggregateInput
   readingAttempts?: Prisma.ReadingAttemptOrderByRelationAggregateInput
+  listeningAttempts?: Prisma.ListeningAttemptOrderByRelationAggregateInput
 }
 
 export type UserWhereUniqueInput = Prisma.AtLeast<{
@@ -240,6 +242,7 @@ export type UserWhereUniqueInput = Prisma.AtLeast<{
   sessions?: Prisma.SessionListRelationFilter
   accounts?: Prisma.AccountListRelationFilter
   readingAttempts?: Prisma.ReadingAttemptListRelationFilter
+  listeningAttempts?: Prisma.ListeningAttemptListRelationFilter
 }, "id" | "email">
 
 export type UserOrderByWithAggregationInput = {
@@ -282,6 +285,7 @@ export type UserCreateInput = {
   sessions?: Prisma.SessionCreateNestedManyWithoutUserInput
   accounts?: Prisma.AccountCreateNestedManyWithoutUserInput
   readingAttempts?: Prisma.ReadingAttemptCreateNestedManyWithoutUserInput
+  listeningAttempts?: Prisma.ListeningAttemptCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateInput = {
@@ -296,6 +300,7 @@ export type UserUncheckedCreateInput = {
   sessions?: Prisma.SessionUncheckedCreateNestedManyWithoutUserInput
   accounts?: Prisma.AccountUncheckedCreateNestedManyWithoutUserInput
   readingAttempts?: Prisma.ReadingAttemptUncheckedCreateNestedManyWithoutUserInput
+  listeningAttempts?: Prisma.ListeningAttemptUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserUpdateInput = {
@@ -310,6 +315,7 @@ export type UserUpdateInput = {
   sessions?: Prisma.SessionUpdateManyWithoutUserNestedInput
   accounts?: Prisma.AccountUpdateManyWithoutUserNestedInput
   readingAttempts?: Prisma.ReadingAttemptUpdateManyWithoutUserNestedInput
+  listeningAttempts?: Prisma.ListeningAttemptUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateInput = {
@@ -324,6 +330,7 @@ export type UserUncheckedUpdateInput = {
   sessions?: Prisma.SessionUncheckedUpdateManyWithoutUserNestedInput
   accounts?: Prisma.AccountUncheckedUpdateManyWithoutUserNestedInput
   readingAttempts?: Prisma.ReadingAttemptUncheckedUpdateManyWithoutUserNestedInput
+  listeningAttempts?: Prisma.ListeningAttemptUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateManyInput = {
@@ -462,6 +469,22 @@ export type UserUpdateOneWithoutReadingAttemptsNestedInput = {
   update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutReadingAttemptsInput, Prisma.UserUpdateWithoutReadingAttemptsInput>, Prisma.UserUncheckedUpdateWithoutReadingAttemptsInput>
 }
 
+export type UserCreateNestedOneWithoutListeningAttemptsInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutListeningAttemptsInput, Prisma.UserUncheckedCreateWithoutListeningAttemptsInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutListeningAttemptsInput
+  connect?: Prisma.UserWhereUniqueInput
+}
+
+export type UserUpdateOneWithoutListeningAttemptsNestedInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutListeningAttemptsInput, Prisma.UserUncheckedCreateWithoutListeningAttemptsInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutListeningAttemptsInput
+  upsert?: Prisma.UserUpsertWithoutListeningAttemptsInput
+  disconnect?: Prisma.UserWhereInput | boolean
+  delete?: Prisma.UserWhereInput | boolean
+  connect?: Prisma.UserWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutListeningAttemptsInput, Prisma.UserUpdateWithoutListeningAttemptsInput>, Prisma.UserUncheckedUpdateWithoutListeningAttemptsInput>
+}
+
 export type UserCreateWithoutSessionsInput = {
   id: string
   name: string
@@ -473,6 +496,7 @@ export type UserCreateWithoutSessionsInput = {
   role?: string | null
   accounts?: Prisma.AccountCreateNestedManyWithoutUserInput
   readingAttempts?: Prisma.ReadingAttemptCreateNestedManyWithoutUserInput
+  listeningAttempts?: Prisma.ListeningAttemptCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutSessionsInput = {
@@ -486,6 +510,7 @@ export type UserUncheckedCreateWithoutSessionsInput = {
   role?: string | null
   accounts?: Prisma.AccountUncheckedCreateNestedManyWithoutUserInput
   readingAttempts?: Prisma.ReadingAttemptUncheckedCreateNestedManyWithoutUserInput
+  listeningAttempts?: Prisma.ListeningAttemptUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutSessionsInput = {
@@ -515,6 +540,7 @@ export type UserUpdateWithoutSessionsInput = {
   role?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   accounts?: Prisma.AccountUpdateManyWithoutUserNestedInput
   readingAttempts?: Prisma.ReadingAttemptUpdateManyWithoutUserNestedInput
+  listeningAttempts?: Prisma.ListeningAttemptUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutSessionsInput = {
@@ -528,6 +554,7 @@ export type UserUncheckedUpdateWithoutSessionsInput = {
   role?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   accounts?: Prisma.AccountUncheckedUpdateManyWithoutUserNestedInput
   readingAttempts?: Prisma.ReadingAttemptUncheckedUpdateManyWithoutUserNestedInput
+  listeningAttempts?: Prisma.ListeningAttemptUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateWithoutAccountsInput = {
@@ -541,6 +568,7 @@ export type UserCreateWithoutAccountsInput = {
   role?: string | null
   sessions?: Prisma.SessionCreateNestedManyWithoutUserInput
   readingAttempts?: Prisma.ReadingAttemptCreateNestedManyWithoutUserInput
+  listeningAttempts?: Prisma.ListeningAttemptCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutAccountsInput = {
@@ -554,6 +582,7 @@ export type UserUncheckedCreateWithoutAccountsInput = {
   role?: string | null
   sessions?: Prisma.SessionUncheckedCreateNestedManyWithoutUserInput
   readingAttempts?: Prisma.ReadingAttemptUncheckedCreateNestedManyWithoutUserInput
+  listeningAttempts?: Prisma.ListeningAttemptUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutAccountsInput = {
@@ -583,6 +612,7 @@ export type UserUpdateWithoutAccountsInput = {
   role?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   sessions?: Prisma.SessionUpdateManyWithoutUserNestedInput
   readingAttempts?: Prisma.ReadingAttemptUpdateManyWithoutUserNestedInput
+  listeningAttempts?: Prisma.ListeningAttemptUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutAccountsInput = {
@@ -596,6 +626,7 @@ export type UserUncheckedUpdateWithoutAccountsInput = {
   role?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   sessions?: Prisma.SessionUncheckedUpdateManyWithoutUserNestedInput
   readingAttempts?: Prisma.ReadingAttemptUncheckedUpdateManyWithoutUserNestedInput
+  listeningAttempts?: Prisma.ListeningAttemptUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateWithoutReadingAttemptsInput = {
@@ -609,6 +640,7 @@ export type UserCreateWithoutReadingAttemptsInput = {
   role?: string | null
   sessions?: Prisma.SessionCreateNestedManyWithoutUserInput
   accounts?: Prisma.AccountCreateNestedManyWithoutUserInput
+  listeningAttempts?: Prisma.ListeningAttemptCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutReadingAttemptsInput = {
@@ -622,6 +654,7 @@ export type UserUncheckedCreateWithoutReadingAttemptsInput = {
   role?: string | null
   sessions?: Prisma.SessionUncheckedCreateNestedManyWithoutUserInput
   accounts?: Prisma.AccountUncheckedCreateNestedManyWithoutUserInput
+  listeningAttempts?: Prisma.ListeningAttemptUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutReadingAttemptsInput = {
@@ -651,6 +684,7 @@ export type UserUpdateWithoutReadingAttemptsInput = {
   role?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   sessions?: Prisma.SessionUpdateManyWithoutUserNestedInput
   accounts?: Prisma.AccountUpdateManyWithoutUserNestedInput
+  listeningAttempts?: Prisma.ListeningAttemptUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutReadingAttemptsInput = {
@@ -664,6 +698,79 @@ export type UserUncheckedUpdateWithoutReadingAttemptsInput = {
   role?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   sessions?: Prisma.SessionUncheckedUpdateManyWithoutUserNestedInput
   accounts?: Prisma.AccountUncheckedUpdateManyWithoutUserNestedInput
+  listeningAttempts?: Prisma.ListeningAttemptUncheckedUpdateManyWithoutUserNestedInput
+}
+
+export type UserCreateWithoutListeningAttemptsInput = {
+  id: string
+  name: string
+  email: string
+  emailVerified: boolean
+  image?: string | null
+  createdAt: Date | string
+  updatedAt: Date | string
+  role?: string | null
+  sessions?: Prisma.SessionCreateNestedManyWithoutUserInput
+  accounts?: Prisma.AccountCreateNestedManyWithoutUserInput
+  readingAttempts?: Prisma.ReadingAttemptCreateNestedManyWithoutUserInput
+}
+
+export type UserUncheckedCreateWithoutListeningAttemptsInput = {
+  id: string
+  name: string
+  email: string
+  emailVerified: boolean
+  image?: string | null
+  createdAt: Date | string
+  updatedAt: Date | string
+  role?: string | null
+  sessions?: Prisma.SessionUncheckedCreateNestedManyWithoutUserInput
+  accounts?: Prisma.AccountUncheckedCreateNestedManyWithoutUserInput
+  readingAttempts?: Prisma.ReadingAttemptUncheckedCreateNestedManyWithoutUserInput
+}
+
+export type UserCreateOrConnectWithoutListeningAttemptsInput = {
+  where: Prisma.UserWhereUniqueInput
+  create: Prisma.XOR<Prisma.UserCreateWithoutListeningAttemptsInput, Prisma.UserUncheckedCreateWithoutListeningAttemptsInput>
+}
+
+export type UserUpsertWithoutListeningAttemptsInput = {
+  update: Prisma.XOR<Prisma.UserUpdateWithoutListeningAttemptsInput, Prisma.UserUncheckedUpdateWithoutListeningAttemptsInput>
+  create: Prisma.XOR<Prisma.UserCreateWithoutListeningAttemptsInput, Prisma.UserUncheckedCreateWithoutListeningAttemptsInput>
+  where?: Prisma.UserWhereInput
+}
+
+export type UserUpdateToOneWithWhereWithoutListeningAttemptsInput = {
+  where?: Prisma.UserWhereInput
+  data: Prisma.XOR<Prisma.UserUpdateWithoutListeningAttemptsInput, Prisma.UserUncheckedUpdateWithoutListeningAttemptsInput>
+}
+
+export type UserUpdateWithoutListeningAttemptsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  emailVerified?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  image?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  role?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  sessions?: Prisma.SessionUpdateManyWithoutUserNestedInput
+  accounts?: Prisma.AccountUpdateManyWithoutUserNestedInput
+  readingAttempts?: Prisma.ReadingAttemptUpdateManyWithoutUserNestedInput
+}
+
+export type UserUncheckedUpdateWithoutListeningAttemptsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  emailVerified?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  image?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  role?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  sessions?: Prisma.SessionUncheckedUpdateManyWithoutUserNestedInput
+  accounts?: Prisma.AccountUncheckedUpdateManyWithoutUserNestedInput
+  readingAttempts?: Prisma.ReadingAttemptUncheckedUpdateManyWithoutUserNestedInput
 }
 
 
@@ -675,12 +782,14 @@ export type UserCountOutputType = {
   sessions: number
   accounts: number
   readingAttempts: number
+  listeningAttempts: number
 }
 
 export type UserCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   sessions?: boolean | UserCountOutputTypeCountSessionsArgs
   accounts?: boolean | UserCountOutputTypeCountAccountsArgs
   readingAttempts?: boolean | UserCountOutputTypeCountReadingAttemptsArgs
+  listeningAttempts?: boolean | UserCountOutputTypeCountListeningAttemptsArgs
 }
 
 /**
@@ -714,6 +823,13 @@ export type UserCountOutputTypeCountReadingAttemptsArgs<ExtArgs extends runtime.
   where?: Prisma.ReadingAttemptWhereInput
 }
 
+/**
+ * UserCountOutputType without action
+ */
+export type UserCountOutputTypeCountListeningAttemptsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.ListeningAttemptWhereInput
+}
+
 
 export type UserSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
@@ -727,6 +843,7 @@ export type UserSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = r
   sessions?: boolean | Prisma.User$sessionsArgs<ExtArgs>
   accounts?: boolean | Prisma.User$accountsArgs<ExtArgs>
   readingAttempts?: boolean | Prisma.User$readingAttemptsArgs<ExtArgs>
+  listeningAttempts?: boolean | Prisma.User$listeningAttemptsArgs<ExtArgs>
   _count?: boolean | Prisma.UserCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["user"]>
 
@@ -768,6 +885,7 @@ export type UserInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = 
   sessions?: boolean | Prisma.User$sessionsArgs<ExtArgs>
   accounts?: boolean | Prisma.User$accountsArgs<ExtArgs>
   readingAttempts?: boolean | Prisma.User$readingAttemptsArgs<ExtArgs>
+  listeningAttempts?: boolean | Prisma.User$listeningAttemptsArgs<ExtArgs>
   _count?: boolean | Prisma.UserCountOutputTypeDefaultArgs<ExtArgs>
 }
 export type UserIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {}
@@ -779,6 +897,7 @@ export type $UserPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs =
     sessions: Prisma.$SessionPayload<ExtArgs>[]
     accounts: Prisma.$AccountPayload<ExtArgs>[]
     readingAttempts: Prisma.$ReadingAttemptPayload<ExtArgs>[]
+    listeningAttempts: Prisma.$ListeningAttemptPayload<ExtArgs>[]
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
@@ -1186,6 +1305,7 @@ export interface Prisma__UserClient<T, Null = never, ExtArgs extends runtime.Typ
   sessions<T extends Prisma.User$sessionsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$sessionsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$SessionPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   accounts<T extends Prisma.User$accountsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$accountsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$AccountPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   readingAttempts<T extends Prisma.User$readingAttemptsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$readingAttemptsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$ReadingAttemptPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  listeningAttempts<T extends Prisma.User$listeningAttemptsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$listeningAttemptsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$ListeningAttemptPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -1685,6 +1805,30 @@ export type User$readingAttemptsArgs<ExtArgs extends runtime.Types.Extensions.In
   take?: number
   skip?: number
   distinct?: Prisma.ReadingAttemptScalarFieldEnum | Prisma.ReadingAttemptScalarFieldEnum[]
+}
+
+/**
+ * User.listeningAttempts
+ */
+export type User$listeningAttemptsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the ListeningAttempt
+   */
+  select?: Prisma.ListeningAttemptSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the ListeningAttempt
+   */
+  omit?: Prisma.ListeningAttemptOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.ListeningAttemptInclude<ExtArgs> | null
+  where?: Prisma.ListeningAttemptWhereInput
+  orderBy?: Prisma.ListeningAttemptOrderByWithRelationInput | Prisma.ListeningAttemptOrderByWithRelationInput[]
+  cursor?: Prisma.ListeningAttemptWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.ListeningAttemptScalarFieldEnum | Prisma.ListeningAttemptScalarFieldEnum[]
 }
 
 /**

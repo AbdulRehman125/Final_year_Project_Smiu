@@ -520,8 +520,9 @@ import { useRouter } from "next/navigation";
 import { motion } from "motion/react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { CheckCircle2, ArrowRight } from "lucide-react";
+import { CheckCircle2, ArrowRight, Lock } from "lucide-react";
 import { ReactNode } from "react";
+import { useSession } from "@/lib/auth-client";
 
 interface ModuleProps {
   title: string;
@@ -538,6 +539,16 @@ interface ModuleProps {
 
 function ModuleShowcase({ title, badge, badgeColor, badgeBg, description, features, ctaText, reverse, uiMockup, href }: ModuleProps) {
   const router = useRouter();
+  const { data: session } = useSession();
+  const isLoggedIn = !!session?.user;
+
+  const handleTestClick = () => {
+    if (!isLoggedIn) {
+      router.push("/auth/sign-in");
+    } else if (href) {
+      router.push(href);
+    }
+  };
 
   return (
     <div className={`flex flex-col gap-12 items-center ${reverse ? 'lg:flex-row-reverse' : 'lg:flex-row'} py-16`}>
@@ -564,11 +575,23 @@ function ModuleShowcase({ title, badge, badgeColor, badgeBg, description, featur
           ))}
         </ul>
         <Button
-          className="mt-4 rounded-full px-8"
-          onClick={() => href && router.push(href)}
-          disabled={!href}
+          className={`mt-4 rounded-full px-8 font-semibold transition-all ${
+            !isLoggedIn
+              ? "bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/30 hover:bg-amber-500/20"
+              : "bg-primary text-primary-foreground"
+          }`}
+          onClick={handleTestClick}
         >
-          {ctaText} <ArrowRight className="ml-2 h-4 w-4" />
+          {isLoggedIn ? (
+            <>
+              {ctaText} <ArrowRight className="ml-2 h-4 w-4" />
+            </>
+          ) : (
+            <>
+              <Lock className="mr-2 h-4 w-4 text-amber-500" />
+              Sign In to Start Test
+            </>
+          )}
         </Button>
       </motion.div>
 
@@ -711,6 +734,7 @@ export function Modules() {
         "Adjustable playback speeds"
       ],
       ctaText: "Try Listening Test",
+      href: "/listening",
       reverse: true,
       uiMockup: (
         <div className="bg-card border shadow-xl rounded-2xl p-6 w-full max-w-lg mx-auto">

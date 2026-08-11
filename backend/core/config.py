@@ -169,7 +169,12 @@ class Settings(BaseSettings):
     LLM_MODEL: str = "llama-3.3-70b-versatile"
     LLM_MAX_TOKENS: int = 2000
     LLM_READING_MAX_TOKENS: int = 8192
+    LLM_LISTENING_MAX_TOKENS: int = 1950
     LLM_TEMPERATURE: float = 0.2
+
+    CLOUDINARY_CLOUD_NAME: str = "dbb2jbpt8"
+    CLOUDINARY_API_KEY: str = "633737442915154"
+    CLOUDINARY_API_SECRET: str = "XjY9o2bXJfyFEWE4fC5O793SG5s"
 
     class Config:
         env_file = ".env"
