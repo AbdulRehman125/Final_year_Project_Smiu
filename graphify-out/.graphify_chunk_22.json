@@ -1,0 +1,19 @@
+{
+  "nodes": [
+    {
+      "id": "frontend_public_charts_line_graph_1_jpg",
+      "label": "line_graph_1.jpg.png",
+      "file_type": "image",
+      "source_file": "D:\\sahil\\New folder\\AI-IELTS NEW\\frontend\\public\\charts\\line_graph_1.jpg.png",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    }
+  ],
+  "edges": [],
+  "hyperedges": [],
+  "input_tokens": 0,
+  "output_tokens": 0
+}
