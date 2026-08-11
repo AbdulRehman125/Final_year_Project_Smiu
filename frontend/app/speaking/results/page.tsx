@@ -399,7 +399,7 @@
 // app/speaking/results/page.tsx — IELTS Speaking results (matches Writing module)
 
 import { useSearchParams, useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useEffect, useState, Suspense } from "react";
 import {
   RotateCcw,
   TrendingUp,
@@ -571,7 +571,7 @@ function CriterionCard({
 
 // ─── Page ────────────────────────────────────────────────────────────────
 
-export default function SpeakingResultsPage() {
+function SpeakingResultsContent() {
   const searchParams = useSearchParams();
   const router = useRouter();
   const [result, setResult] = useState<SpeakingResult | null>(null);
@@ -597,8 +597,11 @@ export default function SpeakingResultsPage() {
         }
       }
     }
-    if (parsed) setResult(parsed);
-    else setError(true);
+    const res = parsed;
+    queueMicrotask(() => {
+      if (res) setResult(res);
+      else setError(true);
+    });
   }, [searchParams]);
 
   if (error) {
@@ -765,5 +768,19 @@ export default function SpeakingResultsPage() {
         </div>
       </div>
     </div>
+  );
+}
+
+export default function SpeakingResultsPage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="min-h-screen bg-background flex items-center justify-center">
+          <div className="w-8 h-8 border-2 border-blue-500 border-t-transparent rounded-full animate-spin" />
+        </div>
+      }
+    >
+      <SpeakingResultsContent />
+    </Suspense>
   );
 }
