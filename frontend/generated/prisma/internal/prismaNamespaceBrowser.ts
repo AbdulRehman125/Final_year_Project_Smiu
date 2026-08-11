@@ -55,7 +55,9 @@ export const ModelName = {
   Session: 'Session',
   Account: 'Account',
   Verification: 'Verification',
-  WritingTask1Image: 'WritingTask1Image'
+  WritingTask1Image: 'WritingTask1Image',
+  ReadingTest: 'ReadingTest',
+  ReadingAttempt: 'ReadingAttempt'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -146,12 +148,64 @@ export const WritingTask1ImageScalarFieldEnum = {
 export type WritingTask1ImageScalarFieldEnum = (typeof WritingTask1ImageScalarFieldEnum)[keyof typeof WritingTask1ImageScalarFieldEnum]
 
 
+export const ReadingTestScalarFieldEnum = {
+  id: 'id',
+  title: 'title',
+  difficulty: 'difficulty',
+  passages: 'passages',
+  questions: 'questions',
+  topics: 'topics',
+  totalQuestions: 'totalQuestions',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type ReadingTestScalarFieldEnum = (typeof ReadingTestScalarFieldEnum)[keyof typeof ReadingTestScalarFieldEnum]
+
+
+export const ReadingAttemptScalarFieldEnum = {
+  id: 'id',
+  userId: 'userId',
+  testId: 'testId',
+  answers: 'answers',
+  score: 'score',
+  bandScore: 'bandScore',
+  accuracy: 'accuracy',
+  timeTakenSeconds: 'timeTakenSeconds',
+  passageScores: 'passageScores',
+  questionTypeScores: 'questionTypeScores',
+  timePerPassage: 'timePerPassage',
+  recommendations: 'recommendations',
+  reportSentAt: 'reportSentAt',
+  startedAt: 'startedAt',
+  completedAt: 'completedAt',
+  createdAt: 'createdAt'
+} as const
+
+export type ReadingAttemptScalarFieldEnum = (typeof ReadingAttemptScalarFieldEnum)[keyof typeof ReadingAttemptScalarFieldEnum]
+
+
 export const SortOrder = {
   asc: 'asc',
   desc: 'desc'
 } as const
 
 export type SortOrder = (typeof SortOrder)[keyof typeof SortOrder]
+
+
+export const JsonNullValueInput = {
+  JsonNull: JsonNull
+} as const
+
+export type JsonNullValueInput = (typeof JsonNullValueInput)[keyof typeof JsonNullValueInput]
+
+
+export const NullableJsonNullValueInput = {
+  DbNull: DbNull,
+  JsonNull: JsonNull
+} as const
+
+export type NullableJsonNullValueInput = (typeof NullableJsonNullValueInput)[keyof typeof NullableJsonNullValueInput]
 
 
 export const QueryMode = {
@@ -168,4 +222,13 @@ export const NullsOrder = {
 } as const
 
 export type NullsOrder = (typeof NullsOrder)[keyof typeof NullsOrder]
+
+
+export const JsonNullValueFilter = {
+  DbNull: DbNull,
+  JsonNull: JsonNull,
+  AnyNull: AnyNull
+} as const
+
+export type JsonNullValueFilter = (typeof JsonNullValueFilter)[keyof typeof JsonNullValueFilter]
 

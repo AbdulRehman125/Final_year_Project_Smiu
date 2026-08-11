@@ -42,3 +42,13 @@ export type Verification = Prisma.VerificationModel
  * 
  */
 export type WritingTask1Image = Prisma.WritingTask1ImageModel
+/**
+ * Model ReadingTest
+ * 
+ */
+export type ReadingTest = Prisma.ReadingTestModel
+/**
+ * Model ReadingAttempt
+ * 
+ */
+export type ReadingAttempt = Prisma.ReadingAttemptModel

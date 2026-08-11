@@ -167,10 +167,8 @@ class Settings(BaseSettings):
     ]
 
     LLM_MODEL: str = "llama-3.3-70b-versatile"
-    # Reduced from 4096 — the merged scoring+AI-detection JSON response
-    # comfortably fits in ~1200-1600 tokens; 2000 leaves headroom without
-    # needlessly reserving/risking hitting Groq's tokens-per-minute cap.
     LLM_MAX_TOKENS: int = 2000
+    LLM_READING_MAX_TOKENS: int = 8192
     LLM_TEMPERATURE: float = 0.2
 
     class Config:

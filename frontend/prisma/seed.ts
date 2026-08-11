@@ -334,6 +334,35 @@ async function main() {
   }
 
   console.log(`\n📊 Total images seeded: ${task1Images.length}`);
+
+  // ── Reading Tests ───────────────────────────
+  console.log("\n📖 Seeding IELTS Reading tests...");
+  const { FALLBACK_READING_TESTS } = await import("@/lib/reading-fallback-tests");
+
+  for (const test of FALLBACK_READING_TESTS) {
+    await db.readingTest.upsert({
+      where: { id: test.id || "seed-test-1" },
+      update: {
+        title: test.title,
+        difficulty: test.difficulty,
+        passages: test.passages as any,
+        questions: test.questions as any,
+        topics: test.topics,
+        totalQuestions: test.totalQuestions,
+      },
+      create: {
+        id: test.id || "seed-test-1",
+        title: test.title,
+        difficulty: test.difficulty,
+        passages: test.passages as any,
+        questions: test.questions as any,
+        topics: test.topics,
+        totalQuestions: test.totalQuestions,
+      },
+    });
+    console.log(`✅ Seeded Reading Test: ${test.title}`);
+  }
+
   console.log("🌳 Seeding complete.");
 }
 

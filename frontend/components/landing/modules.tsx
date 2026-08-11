@@ -600,6 +600,7 @@ export function Modules() {
         "Timed practice to simulate real exams"
       ],
       ctaText: "Try Reading Test",
+      href: "/reading",
       reverse: false,
       uiMockup: (
         <div className="bg-card border shadow-xl rounded-2xl p-6 w-full max-w-lg mx-auto">

@@ -63,6 +63,7 @@ from loguru import logger
 
 from routes.writing import router as writing_router
 from routes.questions import router as questions_router
+from routes.reading import router as reading_router
 from core.config import settings
 from routes.speaking_ws import router as speaking_router
 
@@ -76,7 +77,7 @@ async def lifespan(app: FastAPI):
 
 app = FastAPI(
     title="AI-IELTS Backend",
-    description="IELTS Writing Module — Agent-powered evaluation & question generation API",
+    description="IELTS Writing, Speaking & Reading Module API",
     version="1.0.0",
     lifespan=lifespan,
 )
@@ -91,6 +92,7 @@ app.add_middleware(
 
 app.include_router(writing_router,   prefix="/api/writing",   tags=["Writing Evaluation"])
 app.include_router(questions_router, prefix="/api/questions", tags=["Question Generator"])
+app.include_router(reading_router,   prefix="/api/reading",   tags=["Reading Module"])
 app.include_router(speaking_router)
 
 

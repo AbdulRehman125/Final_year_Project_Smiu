@@ -388,7 +388,9 @@ export const ModelName = {
   Session: 'Session',
   Account: 'Account',
   Verification: 'Verification',
-  WritingTask1Image: 'WritingTask1Image'
+  WritingTask1Image: 'WritingTask1Image',
+  ReadingTest: 'ReadingTest',
+  ReadingAttempt: 'ReadingAttempt'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -404,7 +406,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "user" | "session" | "account" | "verification" | "writingTask1Image"
+    modelProps: "user" | "session" | "account" | "verification" | "writingTask1Image" | "readingTest" | "readingAttempt"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -778,6 +780,154 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         }
       }
     }
+    ReadingTest: {
+      payload: Prisma.$ReadingTestPayload<ExtArgs>
+      fields: Prisma.ReadingTestFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.ReadingTestFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ReadingTestPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.ReadingTestFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ReadingTestPayload>
+        }
+        findFirst: {
+          args: Prisma.ReadingTestFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ReadingTestPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.ReadingTestFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ReadingTestPayload>
+        }
+        findMany: {
+          args: Prisma.ReadingTestFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ReadingTestPayload>[]
+        }
+        create: {
+          args: Prisma.ReadingTestCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ReadingTestPayload>
+        }
+        createMany: {
+          args: Prisma.ReadingTestCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.ReadingTestCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ReadingTestPayload>[]
+        }
+        delete: {
+          args: Prisma.ReadingTestDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ReadingTestPayload>
+        }
+        update: {
+          args: Prisma.ReadingTestUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ReadingTestPayload>
+        }
+        deleteMany: {
+          args: Prisma.ReadingTestDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.ReadingTestUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.ReadingTestUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ReadingTestPayload>[]
+        }
+        upsert: {
+          args: Prisma.ReadingTestUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ReadingTestPayload>
+        }
+        aggregate: {
+          args: Prisma.ReadingTestAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateReadingTest>
+        }
+        groupBy: {
+          args: Prisma.ReadingTestGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.ReadingTestGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.ReadingTestCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.ReadingTestCountAggregateOutputType> | number
+        }
+      }
+    }
+    ReadingAttempt: {
+      payload: Prisma.$ReadingAttemptPayload<ExtArgs>
+      fields: Prisma.ReadingAttemptFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.ReadingAttemptFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ReadingAttemptPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.ReadingAttemptFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ReadingAttemptPayload>
+        }
+        findFirst: {
+          args: Prisma.ReadingAttemptFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ReadingAttemptPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.ReadingAttemptFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ReadingAttemptPayload>
+        }
+        findMany: {
+          args: Prisma.ReadingAttemptFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ReadingAttemptPayload>[]
+        }
+        create: {
+          args: Prisma.ReadingAttemptCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ReadingAttemptPayload>
+        }
+        createMany: {
+          args: Prisma.ReadingAttemptCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.ReadingAttemptCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ReadingAttemptPayload>[]
+        }
+        delete: {
+          args: Prisma.ReadingAttemptDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ReadingAttemptPayload>
+        }
+        update: {
+          args: Prisma.ReadingAttemptUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ReadingAttemptPayload>
+        }
+        deleteMany: {
+          args: Prisma.ReadingAttemptDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.ReadingAttemptUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.ReadingAttemptUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ReadingAttemptPayload>[]
+        }
+        upsert: {
+          args: Prisma.ReadingAttemptUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ReadingAttemptPayload>
+        }
+        aggregate: {
+          args: Prisma.ReadingAttemptAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateReadingAttempt>
+        }
+        groupBy: {
+          args: Prisma.ReadingAttemptGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.ReadingAttemptGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.ReadingAttemptCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.ReadingAttemptCountAggregateOutputType> | number
+        }
+      }
+    }
   }
 } & {
   other: {
@@ -889,12 +1039,64 @@ export const WritingTask1ImageScalarFieldEnum = {
 export type WritingTask1ImageScalarFieldEnum = (typeof WritingTask1ImageScalarFieldEnum)[keyof typeof WritingTask1ImageScalarFieldEnum]
 
 
+export const ReadingTestScalarFieldEnum = {
+  id: 'id',
+  title: 'title',
+  difficulty: 'difficulty',
+  passages: 'passages',
+  questions: 'questions',
+  topics: 'topics',
+  totalQuestions: 'totalQuestions',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type ReadingTestScalarFieldEnum = (typeof ReadingTestScalarFieldEnum)[keyof typeof ReadingTestScalarFieldEnum]
+
+
+export const ReadingAttemptScalarFieldEnum = {
+  id: 'id',
+  userId: 'userId',
+  testId: 'testId',
+  answers: 'answers',
+  score: 'score',
+  bandScore: 'bandScore',
+  accuracy: 'accuracy',
+  timeTakenSeconds: 'timeTakenSeconds',
+  passageScores: 'passageScores',
+  questionTypeScores: 'questionTypeScores',
+  timePerPassage: 'timePerPassage',
+  recommendations: 'recommendations',
+  reportSentAt: 'reportSentAt',
+  startedAt: 'startedAt',
+  completedAt: 'completedAt',
+  createdAt: 'createdAt'
+} as const
+
+export type ReadingAttemptScalarFieldEnum = (typeof ReadingAttemptScalarFieldEnum)[keyof typeof ReadingAttemptScalarFieldEnum]
+
+
 export const SortOrder = {
   asc: 'asc',
   desc: 'desc'
 } as const
 
 export type SortOrder = (typeof SortOrder)[keyof typeof SortOrder]
+
+
+export const JsonNullValueInput = {
+  JsonNull: JsonNull
+} as const
+
+export type JsonNullValueInput = (typeof JsonNullValueInput)[keyof typeof JsonNullValueInput]
+
+
+export const NullableJsonNullValueInput = {
+  DbNull: DbNull,
+  JsonNull: JsonNull
+} as const
+
+export type NullableJsonNullValueInput = (typeof NullableJsonNullValueInput)[keyof typeof NullableJsonNullValueInput]
 
 
 export const QueryMode = {
@@ -911,6 +1113,15 @@ export const NullsOrder = {
 } as const
 
 export type NullsOrder = (typeof NullsOrder)[keyof typeof NullsOrder]
+
+
+export const JsonNullValueFilter = {
+  DbNull: DbNull,
+  JsonNull: JsonNull,
+  AnyNull: AnyNull
+} as const
+
+export type JsonNullValueFilter = (typeof JsonNullValueFilter)[keyof typeof JsonNullValueFilter]
 
 
 
@@ -955,6 +1166,20 @@ export type ListDateTimeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaM
 
 
 /**
+ * Reference to a field of type 'Json'
+ */
+export type JsonFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Json'>
+    
+
+
+/**
+ * Reference to a field of type 'QueryMode'
+ */
+export type EnumQueryModeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'QueryMode'>
+    
+
+
+/**
  * Reference to a field of type 'Int'
  */
 export type IntFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Int'>
@@ -965,6 +1190,20 @@ export type IntFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'In
  * Reference to a field of type 'Int[]'
  */
 export type ListIntFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Int[]'>
+    
+
+
+/**
+ * Reference to a field of type 'Float'
+ */
+export type FloatFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Float'>
+    
+
+
+/**
+ * Reference to a field of type 'Float[]'
+ */
+export type ListFloatFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Float[]'>
     
 
 /**
@@ -1082,6 +1321,8 @@ export type GlobalOmitConfig = {
   account?: Prisma.AccountOmit
   verification?: Prisma.VerificationOmit
   writingTask1Image?: Prisma.WritingTask1ImageOmit
+  readingTest?: Prisma.ReadingTestOmit
+  readingAttempt?: Prisma.ReadingAttemptOmit
 }
 
 /* Types for Logging */

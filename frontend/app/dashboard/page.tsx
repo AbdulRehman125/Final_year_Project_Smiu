@@ -36,6 +36,75 @@ export default function DashboardPage() {
             )}
           </CardContent>
         </Card>
+
+        {/* Reading Module Card */}
+        <Card className="hover:shadow-md transition-shadow border-primary/20 bg-primary/5">
+          <CardHeader>
+            <CardTitle className="flex items-center justify-between">
+              <span>📖 Reading Test</span>
+              <span className="text-xs px-2.5 py-0.5 rounded-full bg-primary text-primary-foreground font-bold">
+                60 Min
+              </span>
+            </CardTitle>
+            <CardDescription>
+              Take a full 3-passage IELTS Academic Reading test (40 questions).
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <a
+              href="/reading"
+              className="inline-flex items-center justify-center w-full h-10 rounded-xl bg-primary text-primary-foreground font-semibold text-sm hover:opacity-90 transition-opacity"
+            >
+              Start Reading Test →
+            </a>
+          </CardContent>
+        </Card>
+
+        {/* Writing Module Card */}
+        <Card className="hover:shadow-md transition-shadow border-border">
+          <CardHeader>
+            <CardTitle className="flex items-center justify-between">
+              <span>✍️ Writing Test</span>
+              <span className="text-xs px-2.5 py-0.5 rounded-full bg-muted text-muted-foreground font-bold">
+                60 Min
+              </span>
+            </CardTitle>
+            <CardDescription>
+              Task 1 (Report/Letter) & Task 2 (Essay) with AI band scoring.
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <a
+              href="/writing"
+              className="inline-flex items-center justify-center w-full h-10 rounded-xl bg-muted text-foreground font-semibold text-sm hover:bg-muted/80 transition-colors"
+            >
+              Start Writing Test →
+            </a>
+          </CardContent>
+        </Card>
+
+        {/* Speaking Module Card */}
+        <Card className="hover:shadow-md transition-shadow border-border">
+          <CardHeader>
+            <CardTitle className="flex items-center justify-between">
+              <span>🎙️ Speaking Test</span>
+              <span className="text-xs px-2.5 py-0.5 rounded-full bg-muted text-muted-foreground font-bold">
+                11-14 Min
+              </span>
+            </CardTitle>
+            <CardDescription>
+              Live voice interview with AI Examiner (Parts 1, 2, & 3).
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <a
+              href="/speaking/test"
+              className="inline-flex items-center justify-center w-full h-10 rounded-xl bg-muted text-foreground font-semibold text-sm hover:bg-muted/80 transition-colors"
+            >
+              Start Speaking Test →
+            </a>
+          </CardContent>
+        </Card>
       </div>
     </div>
   );
