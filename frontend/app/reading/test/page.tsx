@@ -87,8 +87,19 @@ function ReadingTestContent() {
           return;
         }
 
-        // Check whether AI generation flag is enabled (default is false: use DB tests)
-        const generateWithAI = process.env.NEXT_PUBLIC_GENERATE_READING_WITH_AI === "true";
+        // Check whether AI generation flag is enabled (dynamically fetched from DB with fallback to env)
+        let generateWithAI = process.env.NEXT_PUBLIC_GENERATE_READING_WITH_AI === "true";
+        try {
+          const settingsRes = await fetch("/api/settings/public");
+          if (settingsRes.ok) {
+            const settingsData = await settingsRes.json();
+            if (typeof settingsData.NEXT_PUBLIC_GENERATE_READING_WITH_AI === "boolean") {
+              generateWithAI = settingsData.NEXT_PUBLIC_GENERATE_READING_WITH_AI;
+            }
+          }
+        } catch {
+          /* fallback to env */
+        }
 
         let newTest: ReadingTest | null = null;
 

@@ -12,6 +12,7 @@ import {
   BookOpen,
   HelpCircle,
   BarChart3,
+  Sliders,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
@@ -134,6 +135,15 @@ export function Navbar() {
                     Dashboard
                   </Link>
                 </DropdownMenuItem>
+
+                {(session.user as any).role === "admin" && (
+                  <DropdownMenuItem asChild>
+                    <Link href="/admin/settings" className="cursor-pointer text-xs font-medium py-2 rounded-xl text-sky-600 dark:text-sky-400">
+                      <Sliders className="mr-2 h-3.5 w-3.5" />
+                      System Settings
+                    </Link>
+                  </DropdownMenuItem>
+                )}
 
                 <DropdownMenuSeparator />
 
@@ -259,6 +269,17 @@ export function Navbar() {
                       <LayoutDashboard className="h-4 w-4" />
                       Go to Dashboard
                     </Link>
+
+                    {(session.user as any).role === "admin" && (
+                      <Link
+                        href="/admin/settings"
+                        onClick={() => setMobileOpen(false)}
+                        className="flex items-center justify-center gap-2 w-full h-11 rounded-full font-semibold text-xs bg-sky-50 dark:bg-sky-950/60 text-sky-700 dark:text-sky-300 border border-sky-200 dark:border-sky-800 transition-all"
+                      >
+                        <Sliders className="h-4 w-4" />
+                        System Settings
+                      </Link>
+                    )}
 
                     <button
                       type="button"

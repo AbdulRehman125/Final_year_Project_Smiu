@@ -22,14 +22,12 @@ from schemas.listening_schema import (
 )
 from prompts.listening_prompts import TOPIC_POOL, SECTION_PROMPT_TEMPLATE
 
+from core.dynamic_settings import get_chat_groq
+
 class ListeningTestGeneratorAgent:
     def __init__(self):
-        self.llm = ChatGroq(
-            temperature=0.7,
-            groq_api_key=settings.GROQ_API_KEY,
-            model=settings.LLM_MODEL,
-            max_tokens=min(getattr(settings, 'LLM_LISTENING_MAX_TOKENS', 1950), 1950)
-        )
+        self.llm = get_chat_groq(max_tokens=1950, temperature=0.7)
+
 
     async def _generate_audio_for_transcript(self, transcript: str, section_index: int) -> str:
         try:

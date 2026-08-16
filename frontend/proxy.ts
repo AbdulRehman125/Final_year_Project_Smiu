@@ -14,12 +14,12 @@ export default async function proxy(request: NextRequest) {
 		});
 
 		if (!res.ok) {
-			return NextResponse.redirect(new URL("/sign-in", request.url));
+			return NextResponse.redirect(new URL("/auth/sign-in", request.url));
 		}
         
         const session = await res.json();
         if (!session) {
-            return NextResponse.redirect(new URL("/sign-in", request.url));
+            return NextResponse.redirect(new URL("/auth/sign-in", request.url));
         }
 	}
 	

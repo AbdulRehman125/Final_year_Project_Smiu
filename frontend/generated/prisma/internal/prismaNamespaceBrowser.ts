@@ -59,7 +59,8 @@ export const ModelName = {
   ReadingTest: 'ReadingTest',
   ReadingAttempt: 'ReadingAttempt',
   ListeningTest: 'ListeningTest',
-  ListeningAttempt: 'ListeningAttempt'
+  ListeningAttempt: 'ListeningAttempt',
+  SystemSetting: 'SystemSetting'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -224,6 +225,19 @@ export const ListeningAttemptScalarFieldEnum = {
 } as const
 
 export type ListeningAttemptScalarFieldEnum = (typeof ListeningAttemptScalarFieldEnum)[keyof typeof ListeningAttemptScalarFieldEnum]
+
+
+export const SystemSettingScalarFieldEnum = {
+  id: 'id',
+  key: 'key',
+  value: 'value',
+  category: 'category',
+  description: 'description',
+  updatedAt: 'updatedAt',
+  createdAt: 'createdAt'
+} as const
+
+export type SystemSettingScalarFieldEnum = (typeof SystemSettingScalarFieldEnum)[keyof typeof SystemSettingScalarFieldEnum]
 
 
 export const SortOrder = {

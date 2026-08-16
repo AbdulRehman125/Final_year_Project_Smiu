@@ -298,6 +298,8 @@ You generate authentic, exam-ready IELTS Writing questions.
 You ALWAYS return valid JSON only. No preamble, no explanation, no markdown."""
 
 
+from core.dynamic_settings import get_chat_groq
+
 class QuestionGeneratorAgent:
     """
     Generates random IELTS Writing questions using LLM.
@@ -306,13 +308,9 @@ class QuestionGeneratorAgent:
     """
 
     def __init__(self):
-        self.llm = ChatGroq(
-            model=settings.LLM_MODEL,
-            groq_api_key=settings.GROQ_API_KEY,
-            max_tokens=1000,  # trimmed from 1536 — question JSON responses fit comfortably
-            temperature=0.9,  # High temp = more variety across generations
-        )
-        logger.info("QuestionGeneratorAgent initialized")
+        self.llm = get_chat_groq(max_tokens=1000, temperature=0.9)
+        logger.info("QuestionGeneratorAgent initialized with dynamic settings")
+
 
     async def generate_questions(self, test_type: TestType) -> GeneratedWritingQuestions:
         logger.info(f"Generating questions — Type: {test_type}")

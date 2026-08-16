@@ -2069,9 +2069,7 @@ from schemas.speaking_schema import (
 )
 from prompts.speaking_prompts import EXAMINER_SYSTEM_PROMPT, EVALUATOR_SYSTEM_PROMPT
 
-# Single shared client, built from centralized settings (was previously
-# duplicated 3x across this file + routes/speaking_ws.py via raw os.getenv).
-_groq_client = Groq(api_key=settings.GROQ_API_KEY)
+from core.dynamic_settings import get_raw_groq_client, get_llm_model
 
 # Placeholder fed into the conversation when the candidate gave no answer
 # within the silence timeout — kept distinct from a real (possibly short)
@@ -2122,11 +2120,13 @@ class SpeakingAgent:
         """Sync Groq call with retry + backoff on transient rate limits.
         Safe to block here — this always runs inside asyncio.to_thread()."""
         last_error: Optional[Exception] = None
+        client = get_raw_groq_client()
+        model_name = get_llm_model()
 
         for attempt in range(_MAX_LLM_RETRIES):
             try:
-                response = _groq_client.chat.completions.create(
-                    model=settings.LLM_MODEL,
+                response = client.chat.completions.create(
+                    model=model_name,
                     messages=messages,
                     temperature=temperature,
                     max_tokens=max_tokens,

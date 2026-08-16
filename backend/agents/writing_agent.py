@@ -1344,14 +1344,17 @@ class WritingEvaluationAgent:
     how often the account's rate limit gets hit.
     """
 
+from core.dynamic_settings import get_chat_groq
+
+class WritingEvaluationAgent:
+    """
+    IELTS Writing Evaluation Agent.
+    Evaluates Task 1 and Task 2 using Groq with dynamic system settings.
+    """
+
     def __init__(self):
-        self.llm = ChatGroq(
-            model=settings.LLM_MODEL,
-            groq_api_key=settings.GROQ_API_KEY,
-            max_tokens=settings.LLM_MAX_TOKENS,
-            temperature=settings.LLM_TEMPERATURE,
-        )
-        logger.info(f"WritingEvaluationAgent initialized — Model: {settings.LLM_MODEL}")
+        self.llm = get_chat_groq()
+        logger.info(f"WritingEvaluationAgent initialized — Dynamic Model config")
 
     async def evaluate(self, request: WritingEvaluationRequest) -> WritingEvaluationResponse:
         logger.info(f"Starting evaluation — Type: {request.test_type}")

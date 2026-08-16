@@ -3,49 +3,22 @@
 import Link from "next/link";
 import { motion } from "motion/react";
 import {
-  FileText,
   BookOpen,
-  BarChart3,
-  TrendingUp,
   PenLine,
   Headphones,
   Mic,
   ArrowRight,
+  Sliders,
+  Upload,
+  ShieldCheck,
 } from "lucide-react";
 import { Navbar } from "@/components/landing/navbar";
 import { Footer } from "@/components/landing/footer";
+import { useSession } from "@/lib/auth-client";
 
 export default function DashboardPage() {
-  const quickActions = [
-    {
-      title: "Recent Test",
-      subtitle: "View last result",
-      icon: FileText,
-      iconColor: "text-sky-500 dark:text-sky-400",
-      iconBg: "bg-sky-50 dark:bg-sky-950/60 border-sky-100 dark:border-sky-800",
-    },
-    {
-      title: "Start New Test",
-      subtitle: "Begin a module",
-      icon: BookOpen,
-      iconColor: "text-emerald-500 dark:text-emerald-400",
-      iconBg: "bg-emerald-50 dark:bg-emerald-950/60 border-emerald-100 dark:border-emerald-800",
-    },
-    {
-      title: "View Reports",
-      subtitle: "All results",
-      icon: BarChart3,
-      iconColor: "text-amber-500 dark:text-amber-400",
-      iconBg: "bg-amber-50 dark:bg-amber-950/60 border-amber-100 dark:border-amber-800",
-    },
-    {
-      title: "Progress",
-      subtitle: "Track scores",
-      icon: TrendingUp,
-      iconColor: "text-sky-500 dark:text-sky-400",
-      iconBg: "bg-sky-50 dark:bg-sky-950/60 border-sky-100 dark:border-sky-800",
-    },
-  ];
+  const { data: session } = useSession();
+  const isAdmin = (session?.user as any)?.role === "admin";
 
   const testModules = [
     {
@@ -87,7 +60,7 @@ export default function DashboardPage() {
       <Navbar />
 
       <main className="flex-1 py-10 md:py-16 px-4 md:px-6">
-        <div className="container mx-auto">
+        <div className="container mx-auto max-w-5xl">
           {/* Header Section */}
           <div className="text-center mb-8 md:mb-10 space-y-2">
             <h1 className="text-2xl sm:text-3xl lg:text-[34px] font-black tracking-tight text-slate-900 dark:text-slate-100 uppercase">
@@ -98,29 +71,58 @@ export default function DashboardPage() {
             </p>
           </div>
 
-          {/* Top Quick Actions (4 Static Info Cards) */}
-          {/* <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4 mb-8 md:mb-10">
-            {quickActions.map((action, index) => (
-              <div
-                key={index}
-                className="bg-white dark:bg-card border border-slate-200/80 dark:border-border/60 rounded-2xl md:rounded-[22px] p-3.5 md:p-4 flex items-center gap-3 shadow-[0_2px_10px_rgba(0,0,0,0.02)] select-none"
-              >
-                <div
-                  className={`w-8 h-8 rounded-xl border flex items-center justify-center shrink-0 shadow-sm ${action.iconBg} ${action.iconColor}`}
-                >
-                  <action.icon className="h-4 w-4" />
-                </div>
-                <div className="overflow-hidden">
-                  <h3 className="font-bold text-xs md:text-sm text-slate-800 dark:text-slate-200 truncate">
-                    {action.title}
-                  </h3>
-                  <p className="text-[10px] md:text-xs text-slate-400 dark:text-slate-500 truncate">
-                    {action.subtitle}
-                  </p>
-                </div>
+          {/* Admin Control Center (Shown ONLY to Admin users) */}
+          {isAdmin && (
+            <div className="mb-10">
+              <div className="flex items-center gap-2 mb-4">
+                <span className="inline-flex items-center gap-1.5 bg-sky-50 dark:bg-sky-950/60 text-sky-600 dark:text-sky-400 border border-sky-200/80 dark:border-sky-800 px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider">
+                  <ShieldCheck className="w-3.5 h-3.5" />
+                  Admin Control Center
+                </span>
               </div>
-            ))}
-          </div> */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <Link
+                  href="/admin/settings"
+                  className="group bg-gradient-to-br from-sky-50/70 to-blue-50/40 dark:from-sky-950/30 dark:to-blue-950/20 border border-sky-200/80 dark:border-sky-800/80 rounded-[24px] p-5 hover:border-sky-400 dark:hover:border-sky-600 transition-all flex items-center justify-between shadow-sm"
+                >
+                  <div className="flex items-center gap-4">
+                    <div className="w-11 h-11 rounded-2xl bg-[#0284c7] text-white flex items-center justify-center shadow-md">
+                      <Sliders className="w-5 h-5" />
+                    </div>
+                    <div>
+                      <h3 className="font-bold text-sm text-slate-900 dark:text-slate-100 uppercase tracking-wide">
+                        System & AI Settings
+                      </h3>
+                      <p className="text-xs text-slate-500 dark:text-slate-400">
+                        Configure Groq API keys, LLM parameters & test generation switches
+                      </p>
+                    </div>
+                  </div>
+                  <ArrowRight className="w-5 h-5 text-sky-500 group-hover:translate-x-1 transition-transform" />
+                </Link>
+
+                <Link
+                  href="/admin/upload"
+                  className="group bg-gradient-to-br from-indigo-50/70 to-purple-50/40 dark:from-indigo-950/30 dark:to-purple-950/20 border border-indigo-200/80 dark:border-indigo-800/80 rounded-[24px] p-5 hover:border-indigo-400 dark:hover:border-indigo-600 transition-all flex items-center justify-between shadow-sm"
+                >
+                  <div className="flex items-center gap-4">
+                    <div className="w-11 h-11 rounded-2xl bg-indigo-600 text-white flex items-center justify-center shadow-md">
+                      <Upload className="w-5 h-5" />
+                    </div>
+                    <div>
+                      <h3 className="font-bold text-sm text-slate-900 dark:text-slate-100 uppercase tracking-wide">
+                        Upload Task 1 Charts
+                      </h3>
+                      <p className="text-xs text-slate-500 dark:text-slate-400">
+                        Upload IELTS chart images & data to Cloudinary & DB
+                      </p>
+                    </div>
+                  </div>
+                  <ArrowRight className="w-5 h-5 text-indigo-500 group-hover:translate-x-1 transition-transform" />
+                </Link>
+              </div>
+            </div>
+          )}
 
           {/* 2x2 Test Modules Grid */}
           <div id="test-modules" className="grid grid-cols-1 md:grid-cols-2 gap-5 md:gap-6 scroll-mt-24">

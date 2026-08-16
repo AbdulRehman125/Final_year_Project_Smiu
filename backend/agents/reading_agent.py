@@ -48,14 +48,12 @@ def raw_score_to_band(score: int) -> float:
     return 2.5
 
 
+from core.dynamic_settings import get_chat_groq
+
 class ReadingTestGeneratorAgent:
     def __init__(self):
-        self.llm = ChatGroq(
-            model=settings.LLM_MODEL,
-            groq_api_key=settings.GROQ_API_KEY,
-            max_tokens=min(getattr(settings, "LLM_READING_MAX_TOKENS", 8192), 8192),
-            temperature=0.3,
-        )
+        self.llm = get_chat_groq(max_tokens=8192, temperature=0.3)
+
 
     def _sanitize_json(self, raw_text: str) -> str:
         """Removes Markdown code block wrappers and trims trailing whitespace."""

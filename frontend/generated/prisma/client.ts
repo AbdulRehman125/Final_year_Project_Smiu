@@ -86,3 +86,8 @@ export type ListeningTest = Prisma.ListeningTestModel
  * 
  */
 export type ListeningAttempt = Prisma.ListeningAttemptModel
+/**
+ * Model SystemSetting
+ * 
+ */
+export type SystemSetting = Prisma.SystemSettingModel

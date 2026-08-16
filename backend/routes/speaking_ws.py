@@ -402,12 +402,10 @@ from fastapi import APIRouter, WebSocket, WebSocketDisconnect
 from groq import Groq
 from loguru import logger
 
-from core.config import settings
+from core.dynamic_settings import get_raw_groq_client
 from agents.speaking_agent import SpeakingAgent, NO_ANSWER_PLACEHOLDER, RateLimitExceededError
 
 router = APIRouter()
-
-_groq_client = Groq(api_key=settings.GROQ_API_KEY)
 
 # Active sessions — session_id: SpeakingAgent.
 # In-memory by design for now; a horizontally-scaled deployment would need
@@ -426,8 +424,9 @@ def transcribe_audio(audio_bytes: bytes) -> str:
         temp_path = f.name
 
     try:
+        client = get_raw_groq_client()
         with open(temp_path, "rb") as audio_file:
-            result = _groq_client.audio.transcriptions.create(
+            result = client.audio.transcriptions.create(
                 file=(os.path.basename(temp_path), audio_file, "audio/webm"),
                 model="whisper-large-v3-turbo",
                 language="en",
