@@ -826,6 +826,14 @@ export default function ResultsPage() {
 
             {/* ── Actions ── */}
             <div className="bg-card border border-border rounded-3xl p-3 flex flex-col sm:flex-row gap-3">
+               <Button
+                            variant="outline"
+                            className="sm:flex-[2] h-12 rounded-2xl gap-2"
+                            onClick={() => { try { router.push("/"); } catch { /* noop */ } }}
+                          >
+                            <ArrowLeft className="w-4 h-4" />
+                            Back to Home
+                          </Button>
               <Button
                 variant="outline"
                 className="sm:flex-[2] h-12 rounded-2xl gap-2"
@@ -834,6 +842,7 @@ export default function ResultsPage() {
                 <Eye className="w-4 h-4" />
                 Review responses
               </Button>
+                
               <Button
                 className="sm:flex-[3] h-12 rounded-2xl gap-2"
                 onClick={() => { safeSessionStorage.clear(); router.push("/writing") }}
