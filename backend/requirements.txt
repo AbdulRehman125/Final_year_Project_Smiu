@@ -38,3 +38,4 @@ loguru
 
 # JSON
 orjson
+edge-tts
