@@ -237,6 +237,7 @@ class ListeningScorer:
         type_total = {}
         results = []
         
+        answers_map = payload.answers or payload.userAnswers or {}
         questions_dict = {str(q.index): q for q in payload.test.questions}
         
         for q_idx in range(1, 41):
@@ -245,8 +246,8 @@ class ListeningScorer:
                 continue
                 
             q = questions_dict[q_str]
-            user_ans = payload.answers.get(q_str, "")
-            is_correct = ListeningScorer.is_answer_correct(q.type, user_ans, q.correctAnswer)
+            user_ans = str(answers_map.get(q_str, "") or "")
+            is_correct = ListeningScorer.is_answer_correct(q.type, user_ans, str(q.correctAnswer or ""))
             
             if is_correct:
                 score += 1
@@ -261,7 +262,7 @@ class ListeningScorer:
                 type=q.type,
                 text=q.text,
                 userAnswer=user_ans,
-                correctAnswer=q.correctAnswer,
+                correctAnswer=str(q.correctAnswer or ""),
                 isCorrect=is_correct,
                 explanation=q.explanation
             ))
@@ -283,7 +284,7 @@ class ListeningScorer:
         diff_map = {0: "easy", 1: "moderate", 2: "moderate-hard", 3: "hard"}
         for i in range(4):
             section_scores.append(SectionScoreSchema(
-                sectionIndex=i,
+                sectionIndex=i + 1,
                 correct=section_correct[i],
                 total=10,
                 difficulty=diff_map[i]
@@ -291,11 +292,14 @@ class ListeningScorer:
             
         type_scores = []
         for t, total in type_total.items():
+            correct_cnt = type_correct.get(t, 0)
+            pct = (correct_cnt / total * 100.0) if total > 0 else 0.0
             type_scores.append(QuestionTypeScoreSchema(
                 type=t,
                 label=t.replace('_', ' ').title(),
-                correct=type_correct.get(t, 0),
-                total=total
+                correct=correct_cnt,
+                total=total,
+                percentage=pct
             ))
             
         weakest = min(type_scores, key=lambda x: x.correct/x.total if x.total > 0 else 1, default=None)

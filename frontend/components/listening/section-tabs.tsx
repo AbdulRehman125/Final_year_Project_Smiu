@@ -16,7 +16,7 @@ export function SectionTabs({
   onSelectSection,
 }: SectionTabsProps) {
   return (
-    <div className="flex items-center gap-1.5 sm:gap-3 bg-muted/40 p-1 rounded-2xl border border-border">
+    <div className="flex items-center gap-2 bg-white dark:bg-card border border-slate-200/80 dark:border-border/60 p-1.5 rounded-2xl shadow-sm">
       {sections.map((section, idx) => {
         const isActive = activeSection === idx;
         const [startQ, endQ] = section.questionRange || [1, 10];
@@ -31,18 +31,18 @@ export function SectionTabs({
             key={idx}
             type="button"
             onClick={() => onSelectSection(idx)}
-            className={`flex-1 flex items-center justify-between gap-1.5 px-2.5 sm:px-4 py-1.5 sm:py-2 rounded-xl border text-xs sm:text-sm font-semibold transition-all ${
+            className={`flex-1 flex items-center justify-center gap-2 px-3 sm:px-4 py-2 rounded-xl text-xs font-semibold transition-all ${
               isActive
-                ? "bg-primary text-primary-foreground border-primary shadow-sm"
-                : "bg-card text-foreground border-border hover:bg-muted/60"
+                ? "bg-[#0284c7] text-white shadow-sm font-bold"
+                : "text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100 hover:bg-slate-50 dark:hover:bg-slate-800/50"
             }`}
           >
             <span className="truncate whitespace-nowrap">Section {idx + 1}</span>
             <span
-              className={`px-1.5 sm:px-2 py-0.5 rounded-full text-[10px] sm:text-xs font-bold shrink-0 ${
+              className={`px-2 py-0.5 rounded-full text-[10px] font-bold shrink-0 ${
                 isActive
-                  ? "bg-primary-foreground/20 text-primary-foreground"
-                  : "bg-muted text-muted-foreground"
+                  ? "bg-white/20 text-white"
+                  : "bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400"
               }`}
             >
               {answered}/{total}

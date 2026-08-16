@@ -13,14 +13,14 @@ export function PassageReader({ passage }: PassageReaderProps) {
   const [highlightMode, setHighlightMode] = useState(false);
 
   return (
-    <div className="flex flex-col h-full bg-card border border-border rounded-2xl overflow-hidden shadow-sm">
-      {/* Header */}
-      <div className="px-6 py-4 border-b border-border flex items-center justify-between bg-muted/20 shrink-0">
-        <div className="flex items-center gap-3">
-          <span className="px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider bg-primary/10 text-primary">
-            Passage {passage.index + 1}
+    <div className="flex flex-col h-full bg-white dark:bg-card border border-slate-200/80 dark:border-border/60 rounded-[28px] overflow-hidden shadow-sm">
+      {/* Top Header */}
+      <div className="px-6 sm:px-8 pt-6 pb-4 flex items-center justify-between shrink-0">
+        <div className="flex items-center gap-2.5">
+          <span className="px-3 py-1 rounded-full text-[10px] sm:text-xs font-bold uppercase tracking-wider bg-sky-50 dark:bg-sky-950/60 text-sky-600 dark:text-sky-400 border border-sky-200/80 dark:border-sky-800">
+            PASSAGE {passage.index + 1}
           </span>
-          <span className="text-xs text-muted-foreground font-medium">
+          <span className="text-xs text-slate-400 dark:text-slate-500 font-medium">
             {passage.paragraphs.length} paragraphs
           </span>
         </div>
@@ -28,30 +28,30 @@ export function PassageReader({ passage }: PassageReaderProps) {
         <button
           type="button"
           onClick={() => setHighlightMode(!highlightMode)}
-          className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium border transition-colors ${
+          className={`inline-flex items-center gap-1.5 px-3.5 py-1 rounded-full text-xs font-semibold border transition-all ${
             highlightMode
-              ? "bg-amber-500/15 text-amber-600 dark:text-amber-400 border-amber-500/30"
-              : "bg-background text-muted-foreground border-border hover:bg-muted"
+              ? "bg-amber-50 dark:bg-amber-950/50 text-amber-600 dark:text-amber-400 border-amber-300 dark:border-amber-700"
+              : "bg-slate-50 dark:bg-slate-800/60 text-slate-600 dark:text-slate-400 border-slate-200 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-800"
           }`}
         >
-          <Highlighter className="w-3.5 h-3.5" />
-          {highlightMode ? "Highlighting ON" : "Highlight"}
+          <Highlighter className="w-3.5 h-3.5 text-slate-500" />
+          <span>{highlightMode ? "Highlighting ON" : "Highlight"}</span>
         </button>
       </div>
 
       {/* Content scroll area */}
-      <div className="flex-1 min-h-0 overflow-y-auto p-4 sm:p-6 space-y-4 sm:space-y-6">
-        <h1 className="text-2xl sm:text-3xl font-extrabold text-foreground tracking-tight leading-tight uppercase">
+      <div className="flex-1 min-h-0 overflow-y-auto px-6 sm:px-8 pb-8 space-y-6">
+        <h1 className="text-xl sm:text-2xl font-black text-slate-900 dark:text-slate-100 tracking-tight leading-snug uppercase">
           {passage.title}
         </h1>
 
-        <div className="space-y-5 text-sm sm:text-base leading-relaxed text-foreground/90">
+        <div className="space-y-6 text-xs sm:text-sm leading-relaxed text-slate-600 dark:text-slate-300">
           {passage.paragraphs.map((p) => (
             <div key={p.label} id={`p-${p.label}`} className="flex items-start gap-4">
-              <span className="flex-shrink-0 w-7 h-7 rounded-lg bg-muted text-muted-foreground flex items-center justify-center font-bold text-xs border border-border mt-0.5">
+              <span className="flex-shrink-0 w-7 h-7 rounded-full bg-slate-100 dark:bg-slate-800/80 text-slate-600 dark:text-slate-400 flex items-center justify-center font-bold text-xs mt-0.5 select-none">
                 {p.label}
               </span>
-              <div className="flex-1">
+              <div className="flex-1 leading-relaxed">
                 <HighlightingText key={`${passage.index}-${p.label}`} text={p.text} enabled={highlightMode} />
               </div>
             </div>

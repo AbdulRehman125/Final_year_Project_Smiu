@@ -21,7 +21,7 @@ export function CTA() {
             background:
               "linear-gradient(135deg, rgba(45, 156, 219, 0.06) 0%, rgba(30, 136, 229, 0.02) 50%, rgba(45, 156, 219, 0.08) 100%)",
           }}
-          className="relative overflow-hidden rounded-[28px] md:rounded-[36px] border border-sky-100/80 dark:border-slate-800 px-4 py-8 md:py-14 text-center shadow-[0_2px_16px_rgba(0,0,0,0.02)] dark:bg-slate-900/60"
+          className="relative overflow-hidden rounded-[28px] md:rounded-[36px] border border-primary/30 dark:border-slate-800 px-4 py-8 md:py-14 text-center shadow-[0_2px_16px_rgba(0,0,0,0.02)] dark:bg-slate-900/60"
         >
           {/* Logo */}
           <div className="flex justify-center">

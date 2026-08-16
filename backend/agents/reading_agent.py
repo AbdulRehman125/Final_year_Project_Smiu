@@ -270,7 +270,7 @@ class ReadingScorer:
     @classmethod
     def evaluate(cls, payload: ReadingSubmitRequest) -> ReadingSubmitResponse:
         test = payload.test
-        answers = payload.answers  # Dict[str, str] keyed by question index str e.g. "1"
+        answers = payload.answers or payload.userAnswers or {}  # Dict[str, str] keyed by question index str e.g. "1"
 
         question_results: List[QuestionResultSchema] = []
         raw_score = 0

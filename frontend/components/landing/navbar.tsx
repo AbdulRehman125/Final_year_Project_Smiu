@@ -41,10 +41,10 @@ export function Navbar() {
   }, []);
 
   const navLinks = [
-    { name: "Features", href: "#features", icon: Sparkles },
-    { name: "Modules", href: "#modules", icon: BookOpen },
-    { name: "How It Works", href: "#how-it-works", icon: HelpCircle },
-    { name: "Analytics", href: "#progress-tracking", icon: BarChart3 },
+    { name: "Features", href: "/#features", icon: Sparkles },
+    { name: "Modules", href: "/#modules", icon: BookOpen },
+    { name: "How It Works", href: "/#how-it-works", icon: HelpCircle },
+    // { name: "Analytics", href: "/#progress-tracking", icon: BarChart3 },
   ];
 
   const handleSignOut = async () => {
@@ -149,17 +149,17 @@ export function Navbar() {
           ) : (
             <div className="flex items-center gap-2">
               <Link
-                href="/sign-in"
+                href="auth/sign-in"
                 className="text-xs md:text-sm font-semibold text-slate-600 hover:text-slate-900 dark:text-slate-300 dark:hover:text-white px-4 py-2 rounded-full transition-colors"
               >
                 Log In
               </Link>
 
               <Link
-                href="/sign-up"
+                href="auth/sign-up"
                 className="inline-flex items-center justify-center bg-[#0284c7] hover:bg-[#0369a1] text-white font-semibold text-xs md:text-sm px-5 py-2 rounded-full shadow-[0_4px_14px_rgba(2,132,199,0.25)] transition-all hover:shadow-lg"
               >
-                Get Started
+                Sign In
               </Link>
             </div>
           )}

@@ -82,7 +82,8 @@ export interface ReadingEvaluationResponse {
 }
 
 export interface ReadingSubmitPayload {
-  answers: Record<string, string>; // question index string -> answer
+  answers?: Record<string, string>; // question index string -> answer
+  userAnswers?: Record<string, string>;
   timeTakenSeconds: number;
   test: ReadingTest;
 }

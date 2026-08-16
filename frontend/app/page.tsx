@@ -15,12 +15,12 @@ export default function Page() {
       <Navbar />
       <main className="flex-1 overflow-hidden">
         <Hero />
-        <Metrics />
+        {/* <Metrics /> */}
         <Features />
         <Steps />
         <Modules />
         <ProgressTracking />
-        <Testimonials />
+        {/* <Testimonials /> */}
         <CTA />
       </main>
       <Footer />

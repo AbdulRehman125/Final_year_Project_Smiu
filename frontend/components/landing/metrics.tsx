@@ -40,7 +40,7 @@ export function Metrics() {
           {stats.map((stat, index) => (
             <motion.div key={index} variants={itemVariants}>
               <Card className="border-none shadow-md dark:bg-card">
-                <CardContent className="p-6 flex flex-col items-center text-center space-y-4">
+                <CardContent className="p-6 py-4 flex flex-col items-center text-center space-y-2">
                   <div className={`p-3 rounded-full bg-muted/50 ${stat.color}`}>
                     <stat.icon className="h-6 w-6" />
                   </div>

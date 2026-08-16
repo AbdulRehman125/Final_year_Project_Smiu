@@ -29,23 +29,23 @@ export function Footer() {
             {/* Navigation Links */}
             <div className="flex items-center gap-6 md:gap-8 text-xs md:text-sm font-medium text-slate-500 dark:text-slate-400">
               <Link
-                href="#features"
+                href="/#features"
                 className="hover:text-slate-900 dark:hover:text-slate-100 transition-colors"
               >
                 Features
               </Link>
               <Link
-                href="#modules"
+                href="/#modules"
                 className="hover:text-slate-900 dark:hover:text-slate-100 transition-colors"
               >
                 Modules
               </Link>
-              {/* <Link
-                href="/privacy"
+              <Link
+                href="/#how-it-works"
                 className="hover:text-slate-900 dark:hover:text-slate-100 transition-colors"
               >
-                Privacy Policy
-              </Link> */}
+                How It Works
+              </Link>
             </div>
 
             {/* Social Icons */}

@@ -1,7 +1,7 @@
 "use client";
 
-import { useRef, useState, useEffect, useCallback } from "react";
-import { Play, Pause, Volume2, VolumeX } from "lucide-react";
+import { useRef, useState, useEffect } from "react";
+import { Play, Pause, Volume2, VolumeX, RotateCcw, FastForward } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Slider } from "@/components/ui/slider";
 
@@ -16,7 +16,7 @@ export function AudioPlayer({
   audioUrl,
   onEnded,
   autoPlay = false,
-  allowRewind = false,
+  allowRewind = true,
 }: AudioPlayerProps) {
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const [isPlaying, setIsPlaying] = useState(false);
@@ -64,19 +64,22 @@ export function AudioPlayer({
   const handleSeek = (value: number[]) => {
     if (!audioRef.current) return;
     const newTime = value[0];
-    if (!allowRewind && newTime < currentTime) {
-      // Prevent rewinding
-      return;
-    }
+    audioRef.current.currentTime = newTime;
+    setCurrentTime(newTime);
+  };
+
+  const handleSkip = (seconds: number) => {
+    if (!audioRef.current) return;
+    const newTime = Math.min(Math.max(audioRef.current.currentTime + seconds, 0), duration);
     audioRef.current.currentTime = newTime;
     setCurrentTime(newTime);
   };
 
   const formatTime = (time: number) => {
-    if (isNaN(time)) return "00:00";
+    if (isNaN(time)) return "0:00";
     const mins = Math.floor(time / 60);
     const secs = Math.floor(time % 60);
-    return `${mins.toString().padStart(2, "0")}:${secs.toString().padStart(2, "0")}`;
+    return `${mins}:${secs.toString().padStart(2, "0")}`;
   };
 
   const toggleMute = () => {
@@ -99,19 +102,20 @@ export function AudioPlayer({
     setPlaybackRate(rate);
   };
 
-  if (!audioUrl) {
-    return (
-      <div className="flex items-center justify-center p-6 bg-card border border-border rounded-2xl text-muted-foreground shadow-sm">
-        <p>No Audio Available</p>
-      </div>
-    );
-  }
+  // Mock waveform bars
+  const waveformBars = [
+    12, 16, 24, 18, 14, 28, 36, 48, 32, 22, 16, 26, 38, 44, 30, 20, 14, 18,
+    30, 42, 50, 36, 24, 16, 28, 40, 46, 34, 22, 14, 20, 32, 44, 36, 24, 18,
+    14, 22, 34, 40, 28, 18, 12,
+  ];
+
+  const progressPercent = duration > 0 ? (currentTime / duration) * 100 : 0;
 
   return (
-    <div className="bg-card border border-border rounded-2xl p-4 sm:p-6 shadow-sm space-y-4">
+    <div className="bg-white dark:bg-card border border-slate-200/80 dark:border-border/60 rounded-[28px] p-6 shadow-sm space-y-6">
       <audio
         ref={audioRef}
-        src={audioUrl}
+        src={audioUrl || undefined}
         onTimeUpdate={handleTimeUpdate}
         onLoadedMetadata={handleLoadedMetadata}
         onEnded={handleEnded}
@@ -120,86 +124,126 @@ export function AudioPlayer({
         className="hidden"
       />
 
-      <div className="flex flex-col sm:flex-row items-center gap-4 sm:gap-6">
-        <button
-          onClick={togglePlay}
-          className="w-12 h-12 flex items-center justify-center rounded-full bg-primary text-primary-foreground hover:bg-primary/90 transition-colors shrink-0 shadow-sm"
-        >
-          {isPlaying ? <Pause className="w-6 h-6" /> : <Play className="w-6 h-6 ml-1" />}
-        </button>
+      {/* Waveform Bar Graphic with scrubber */}
+      <div className="relative py-2">
+        <div className="flex items-center justify-between gap-1 h-14 px-2">
+          {waveformBars.map((height, i) => {
+            const barPercent = (i / waveformBars.length) * 100;
+            const isPassed = barPercent <= progressPercent;
 
-        <div className="flex-1 w-full space-y-2">
-          <div className="flex items-center justify-between text-xs font-medium text-muted-foreground">
-            <span>{formatTime(currentTime)}</span>
-            <span>{formatTime(duration)}</span>
-          </div>
+            return (
+              <div
+                key={i}
+                className={cn(
+                  "flex-1 rounded-full transition-all duration-150",
+                  isPassed
+                    ? "bg-[#0284c7]"
+                    : "bg-slate-100 dark:bg-slate-800"
+                )}
+                style={{
+                  height: `${height}px`,
+                  minWidth: "2px",
+                  maxWidth: "6px",
+                }}
+              />
+            );
+          })}
+        </div>
+
+        {/* Hidden / overlay scrubber slider */}
+        <div className="pt-2">
           <Slider
             value={[currentTime]}
-            max={duration || 100}
+            max={duration || 420}
             step={1}
             onValueChange={handleSeek}
-            className={cn("w-full cursor-pointer", !allowRewind && "opacity-80")}
-            disabled={!allowRewind}
+            className="w-full cursor-pointer"
           />
         </div>
 
-        <div className="flex items-center gap-4 w-full sm:w-auto justify-between sm:justify-start">
-          <div className="flex items-center gap-2">
-            <button
-              onClick={toggleMute}
-              className="text-muted-foreground hover:text-foreground transition-colors"
-            >
-              {isMuted || volume === 0 ? (
-                <VolumeX className="w-5 h-5" />
-              ) : (
-                <Volume2 className="w-5 h-5" />
-              )}
-            </button>
-            <div className="w-20 hidden sm:block">
-              <Slider
-                value={[isMuted ? 0 : volume]}
-                max={1}
-                step={0.01}
-                onValueChange={handleVolumeChange}
-              />
-            </div>
-          </div>
-
-          <div className="flex items-center bg-muted/50 rounded-lg p-1">
-            {[0.75, 1, 1.25, 1.5].map((rate) => (
-              <button
-                key={rate}
-                onClick={() => handleRateChange(rate)}
-                className={cn(
-                  "px-2 py-1 text-xs font-medium rounded-md transition-colors",
-                  playbackRate === rate
-                    ? "bg-background text-foreground shadow-sm"
-                    : "text-muted-foreground hover:text-foreground hover:bg-muted"
-                )}
-              >
-                {rate}x
-              </button>
-            ))}
-          </div>
+        <div className="flex items-center justify-between text-[11px] font-bold text-slate-400 dark:text-slate-500 pt-1.5">
+          <span>{formatTime(currentTime)}</span>
+          <span>{formatTime(duration || 420)}</span>
         </div>
       </div>
-      
-      {/* Waveform visualization (CSS based) */}
-      {isPlaying && (
-        <div className="flex items-center justify-center gap-1 h-6 pt-2">
-          {Array.from({ length: 20 }).map((_, i) => (
-            <div
-              key={i}
-              className="w-1 bg-primary/60 rounded-full animate-pulse"
-              style={{
-                height: `${Math.max(20, Math.random() * 100)}%`,
-                animationDelay: `${Math.random() * 0.5}s`,
-                animationDuration: `${0.5 + Math.random() * 0.5}s`
-              }}
+
+      {/* Control Bar: Volume, Skip, Play/Pause, Speeds */}
+      <div className="flex flex-wrap items-center justify-between gap-4 pt-1 border-t border-slate-100 dark:border-border/60">
+        {/* Left: Volume Controls */}
+        <div className="flex items-center gap-2">
+          <button
+            type="button"
+            onClick={toggleMute}
+            className="text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 transition-colors"
+          >
+            {isMuted || volume === 0 ? (
+              <VolumeX className="w-4 h-4" />
+            ) : (
+              <Volume2 className="w-4 h-4" />
+            )}
+          </button>
+          <div className="w-16">
+            <Slider
+              value={[isMuted ? 0 : volume]}
+              max={1}
+              step={0.01}
+              onValueChange={handleVolumeChange}
             />
+          </div>
+        </div>
+
+        {/* Center: Play Controls (Previous, Large Blue Play Button, Next) */}
+        <div className="flex items-center gap-3">
+          <button
+            type="button"
+            onClick={() => handleSkip(-5)}
+            className="w-8 h-8 rounded-full flex items-center justify-center text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 hover:bg-slate-50 transition-colors"
+            title="Rewind 5s"
+          >
+            <RotateCcw className="w-4 h-4" />
+          </button>
+
+          <button
+            type="button"
+            onClick={togglePlay}
+            className="w-12 h-12 flex items-center justify-center rounded-2xl bg-[#0284c7] hover:bg-[#0369a1] text-white transition-all shadow-[0_4px_14px_rgba(2,132,199,0.35)] shrink-0"
+          >
+            {isPlaying ? (
+              <Pause className="w-5 h-5" />
+            ) : (
+              <Play className="w-5 h-5 ml-0.5" />
+            )}
+          </button>
+
+          <button
+            type="button"
+            onClick={() => handleSkip(5)}
+            className="w-8 h-8 rounded-full flex items-center justify-center text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 hover:bg-slate-50 transition-colors"
+            title="Forward 5s"
+          >
+            <FastForward className="w-4 h-4" />
+          </button>
+        </div>
+
+        {/* Right: Speed controls */}
+        <div className="flex items-center gap-1 bg-slate-50 dark:bg-slate-800/60 p-1 rounded-xl">
+          {[0.75, 1, 1.25, 1.5].map((rate) => (
+            <button
+              key={rate}
+              type="button"
+              onClick={() => handleRateChange(rate)}
+              className={cn(
+                "px-2 py-0.5 text-[10px] font-bold rounded-lg transition-colors",
+                playbackRate === rate
+                  ? "bg-[#0284c7] text-white shadow-sm"
+                  : "text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-slate-100"
+              )}
+            >
+              {rate === 1 ? "1x" : `${rate}x`}
+            </button>
           ))}
         </div>
-      )}
+      </div>
     </div>
   );
 }

@@ -6,34 +6,53 @@ import { useEffect, useState, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import {
   RotateCcw,
+  Target,
+  Clock,
+  LayoutGrid,
+  AlertCircle,
+  Lightbulb,
+  Eye,
   CheckCircle,
-  Headphones,
   Mail,
+  Home,
   Sparkles,
   ChevronRight,
-  Home,
+  Headphones,
 } from "lucide-react";
+import { Bar, BarChart, CartesianGrid, XAxis, YAxis } from "recharts";
 
 import { Button } from "@/components/ui/button";
-import { BandCircle } from "@/components/writing/band-circle";
 import { BandScoreScale } from "@/components/listening/band-score-scale";
 import { SectionPerformanceBar } from "@/components/listening/section-performance-bar";
 import { AnswerReviewCard } from "@/components/listening/answer-review-card";
+import {
+  ChartContainer,
+  ChartTooltip,
+  ChartTooltipContent,
+  type ChartConfig,
+} from "@/components/ui/chart";
 import { cn } from "@/lib/utils";
 
 import type { ListeningEvaluationResponse } from "@/lib/listening-types";
-import { bandToLabel, bandToColor } from "@/lib/listening-types";
 import { safeSessionStorage } from "@/lib/reading-network-utils";
 import { trpc } from "@/server/client";
 
-function formatDuration(totalSeconds: number) {
+function formatDurationComponents(totalSeconds: number) {
   const m = Math.floor(totalSeconds / 60);
   const s = totalSeconds % 60;
-  return m > 0 ? `${m}m ${s}s` : `${s}s`;
+  return { m, s };
 }
 
-function QuestionReviewSection({ questionResults }: { questionResults: any[] }) {
+// ── Question Review Section with Tab Switching (All / Incorrect / Correct) ──
+function QuestionReviewSection({
+  questionResults,
+}: {
+  questionResults: any[];
+}) {
   const [filter, setFilter] = useState<"all" | "incorrect" | "correct">("all");
+
+  const incorrectCount = questionResults.filter((q) => !q.isCorrect).length;
+  const correctCount = questionResults.filter((q) => q.isCorrect).length;
 
   const filtered = questionResults.filter((q) => {
     if (filter === "incorrect") return !q.isCorrect;
@@ -41,25 +60,26 @@ function QuestionReviewSection({ questionResults }: { questionResults: any[] }) 
     return true;
   });
 
-  const incorrectCount = questionResults.filter((q) => !q.isCorrect).length;
-  const correctCount = questionResults.filter((q) => q.isCorrect).length;
-
   return (
-    <div className="space-y-4">
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-border pb-3">
-        <h3 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-          Question Review ({questionResults.length} Questions)
-        </h3>
+    <div className="bg-white dark:bg-card border border-slate-200/80 dark:border-border/60 rounded-[24px] p-6 shadow-sm space-y-4">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-100 dark:border-border/60 pb-4">
+        <div className="flex items-center gap-2">
+          <AlertCircle className="w-4 h-4 text-sky-500" />
+          <h3 className="text-xs font-black uppercase tracking-wider text-slate-800 dark:text-slate-100">
+            QUESTION REVIEW ({questionResults.length} QUESTIONS)
+          </h3>
+        </div>
 
-        <div className="flex items-center gap-1.5 bg-muted/40 p-1 rounded-xl border border-border">
+        {/* Tab Buttons */}
+        <div className="flex items-center gap-1.5 bg-slate-100 dark:bg-slate-800/60 p-1 rounded-xl">
           <button
             type="button"
             onClick={() => setFilter("all")}
             className={cn(
-              "px-3 py-1 rounded-lg text-xs font-bold transition-all",
+              "px-3 py-1.5 rounded-lg text-xs font-bold transition-all",
               filter === "all"
-                ? "bg-card text-foreground shadow-sm"
-                : "text-muted-foreground hover:text-foreground"
+                ? "bg-white dark:bg-card text-slate-900 dark:text-slate-100 shadow-sm"
+                : "text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100"
             )}
           >
             All ({questionResults.length})
@@ -68,10 +88,10 @@ function QuestionReviewSection({ questionResults }: { questionResults: any[] }) 
             type="button"
             onClick={() => setFilter("incorrect")}
             className={cn(
-              "px-3 py-1 rounded-lg text-xs font-bold transition-all",
+              "px-3 py-1.5 rounded-lg text-xs font-bold transition-all",
               filter === "incorrect"
-                ? "bg-red-500/10 text-red-600 dark:text-red-400 border border-red-500/20 shadow-sm"
-                : "text-muted-foreground hover:text-foreground"
+                ? "bg-rose-50 dark:bg-rose-950/60 text-rose-600 dark:text-rose-400 border border-rose-200 dark:border-rose-800 shadow-sm"
+                : "text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100"
             )}
           >
             Incorrect ({incorrectCount})
@@ -80,10 +100,10 @@ function QuestionReviewSection({ questionResults }: { questionResults: any[] }) 
             type="button"
             onClick={() => setFilter("correct")}
             className={cn(
-              "px-3 py-1 rounded-lg text-xs font-bold transition-all",
+              "px-3 py-1.5 rounded-lg text-xs font-bold transition-all",
               filter === "correct"
-                ? "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20 shadow-sm"
-                : "text-muted-foreground hover:text-foreground"
+                ? "bg-emerald-50 dark:bg-emerald-950/60 text-emerald-600 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-800 shadow-sm"
+                : "text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100"
             )}
           >
             Correct ({correctCount})
@@ -91,10 +111,14 @@ function QuestionReviewSection({ questionResults }: { questionResults: any[] }) 
         </div>
       </div>
 
-      <div className="space-y-3">
-        {filtered.map((q) => (
-          <AnswerReviewCard key={q.index} result={q} />
-        ))}
+      <div className="space-y-2 pt-1">
+        {filtered.length === 0 ? (
+          <div className="text-center py-6 text-xs text-slate-400">
+            No questions match this filter.
+          </div>
+        ) : (
+          filtered.map((q) => <AnswerReviewCard key={q.index} result={q} />)
+        )}
       </div>
     </div>
   );
@@ -120,7 +144,9 @@ function ListeningResultsContent() {
   useEffect(() => {
     let parsed: ListeningEvaluationResponse | null = null;
     try {
-      const stored = safeSessionStorage.getItem<ListeningEvaluationResponse>("listening_results");
+      const stored = safeSessionStorage.getItem<ListeningEvaluationResponse>(
+        "listening_results"
+      );
       if (stored) parsed = stored;
     } catch {
       /* ignore */
@@ -163,9 +189,9 @@ function ListeningResultsContent() {
 
   if (error) {
     return (
-      <div className="min-h-screen bg-background flex items-center justify-center p-6">
+      <div className="min-h-screen bg-[#f8fafc] dark:bg-background flex items-center justify-center p-6">
         <div className="text-center space-y-4">
-          <p className="text-muted-foreground">Listening result data not found.</p>
+          <p className="text-slate-500">Listening result data not found.</p>
           <Button onClick={() => router.push("/listening")}>Take Test Again</Button>
         </div>
       </div>
@@ -174,26 +200,54 @@ function ListeningResultsContent() {
 
   if (!results) {
     return (
-      <div className="min-h-screen bg-background flex items-center justify-center">
-        <div className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin" />
+      <div className="min-h-screen bg-[#f8fafc] dark:bg-background flex items-center justify-center">
+        <div className="w-8 h-8 border-2 border-sky-500 border-t-transparent rounded-full animate-spin" />
       </div>
     );
   }
 
-  const answeredCount = results.questionResults.filter((q) => q.userAnswer.trim().length > 0).length;
+  const { m: minutes, s: seconds } = formatDurationComponents(
+    results.timeTakenSeconds
+  );
+  const incorrectCount = 40 - results.score;
+
+  // Chart configuration & data for Recharts Time Distribution (4 Listening Sections)
+  const totalMins = Math.max(results.timeTakenSeconds / 60, 1);
+  const s1Mins = Number((totalMins * 0.23).toFixed(1));
+  const s2Mins = Number((totalMins * 0.27).toFixed(1));
+  const s3Mins = Number((totalMins * 0.25).toFixed(1));
+  const s4Mins = Number((totalMins * 0.25).toFixed(1));
+
+  const chartData = [
+    { section: "Section 1", minutes: s1Mins },
+    { section: "Section 2", minutes: s2Mins },
+    { section: "Section 3", minutes: s3Mins },
+    { section: "Section 4", minutes: s4Mins },
+  ];
+
+  const chartConfig = {
+    minutes: {
+      label: "Time (mins)",
+      color: "#0284c7",
+    },
+  } satisfies ChartConfig;
 
   return (
-    <div className="min-h-screen bg-background text-foreground pb-16">
-      <div className="max-w-4xl mx-auto px-4 py-8 sm:py-12 space-y-8">
-        {/* Header */}
-        <div className="flex items-center justify-between border-b border-border pb-4">
+    <div className="min-h-screen bg-[#f8fafc] dark:bg-background text-slate-900 dark:text-slate-100 py-8 px-4 md:px-6">
+      <div className=" mx-auto space-y-6">
+        {/* ── Top Header with Home & New Test Buttons ── */}
+        <div className="flex items-center justify-between border-b border-slate-200/80 dark:border-border/60 pb-4">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-2xl bg-primary text-primary-foreground flex items-center justify-center">
+            <div className="w-10 h-10 rounded-2xl bg-[#0284c7] text-white flex items-center justify-center shadow-sm">
               <Headphones className="w-5 h-5" />
             </div>
             <div>
-              <h1 className="text-xl font-bold tracking-tight">IELTS LISTENING RESULTS</h1>
-              <p className="text-xs text-muted-foreground">Official Academic Listening Evaluation</p>
+              <h1 className="text-lg sm:text-xl font-black uppercase tracking-tight text-slate-900 dark:text-slate-100">
+                IELTS LISTENING RESULTS
+              </h1>
+              <p className="text-xs text-slate-500 dark:text-slate-400">
+                Official Academic Listening Evaluation
+              </p>
             </div>
           </div>
 
@@ -201,225 +255,298 @@ function ListeningResultsContent() {
             <Button
               variant="outline"
               size="sm"
-              className="rounded-xl"
+              className="rounded-full px-4 text-xs font-semibold border-slate-200 hover:bg-slate-50"
               onClick={() => router.push("/")}
             >
-              <Home className="w-4 h-4 mr-1.5" />
+              <Home className="w-3.5 h-3.5 mr-1.5 text-slate-500" />
               Home
             </Button>
             <Button
               size="sm"
-              className="rounded-xl bg-primary"
+              className="rounded-full px-4 text-xs font-bold bg-[#0284c7] hover:bg-[#0369a1] text-white shadow-sm"
               onClick={() => {
                 safeSessionStorage.removeItem("ielts_listening_draft");
                 router.push("/listening/test?fresh=true");
               }}
             >
-              <RotateCcw className="w-4 h-4 mr-1.5" />
+              <RotateCcw className="w-3.5 h-3.5 mr-1.5" />
               New Test
             </Button>
           </div>
         </div>
 
-        {/* ── 1. Top Stat Cards Row ── */}
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+        {/* ── 1. Top Stat Cards (3 Cards) ── */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           {/* Card 1: Band Score */}
-          <div className="bg-card border border-border rounded-3xl p-6 flex items-center gap-5 shadow-sm">
-            <BandCircle band={results.bandScore} size="lg" />
+          <div className="bg-white dark:bg-card border border-slate-200/80 dark:border-border/60 rounded-[24px] p-6 flex items-center gap-5 shadow-sm">
+            <div className="w-16 h-16 rounded-full border-[3px] border-[#0284c7] flex flex-col items-center justify-center bg-white dark:bg-card shadow-sm shrink-0">
+              <span className="text-xl font-black text-slate-900 dark:text-slate-100 leading-none">
+                {results.bandScore.toFixed(1)}
+              </span>
+              <span className="text-[9px] font-bold text-slate-400 mt-0.5 leading-none">
+                of 9.0
+              </span>
+            </div>
             <div>
-              <div className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-                Your Listening Band
+              <div className="text-[9px] font-bold uppercase tracking-wider text-slate-400">
+                YOUR IELTS LISTENING BAND
               </div>
-              <div className={cn("text-2xl font-extrabold mt-1", bandToColor(results.bandScore))}>
-                {bandToLabel(results.bandScore)}
+              <div className="text-xl font-black text-slate-900 dark:text-slate-100 mt-0.5">
+                {results.score} / 40
               </div>
-              <div className="text-xs text-muted-foreground mt-1 font-medium">
-                Raw Score: <span className="font-bold text-foreground">{results.score} / 40</span>
-              </div>
+              <div className="text-[11px] text-slate-400">Raw Score</div>
             </div>
           </div>
 
           {/* Card 2: Accuracy */}
-          <div className="bg-card border border-border rounded-3xl p-6 flex flex-col justify-between shadow-sm">
-            <div className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-              Accuracy
+          <div className="bg-white dark:bg-card border border-slate-200/80 dark:border-border/60 rounded-[24px] p-6 flex flex-col justify-between shadow-sm space-y-2">
+            <div className="flex items-center gap-1.5 text-[9px] font-bold uppercase tracking-wider text-slate-400">
+              <Target className="w-3.5 h-3.5 text-sky-500" />
+              ACCURACY
             </div>
-            <div className="text-3xl font-extrabold text-primary">
-              ~{results.accuracy.toFixed(0)}%
+            <div className="text-3xl font-black text-slate-900 dark:text-slate-100">
+              {results.accuracy.toFixed(0)}%
             </div>
-            <div className="w-full bg-muted rounded-full h-2 overflow-hidden">
+            <div className="w-full bg-slate-100 dark:bg-slate-800 rounded-full h-2 overflow-hidden">
               <div
-                className="h-full bg-primary transition-all duration-700"
+                className="h-full bg-rose-500 transition-all duration-700"
                 style={{ width: `${results.accuracy}%` }}
               />
+            </div>
+            <div className="flex items-center justify-between text-[10px] text-slate-400 font-medium">
+              <span>{results.score} correct</span>
+              <span>{incorrectCount} incorrect</span>
             </div>
           </div>
 
           {/* Card 3: Time Taken */}
-          <div className="bg-card border border-border rounded-3xl p-6 flex flex-col justify-between shadow-sm">
-            <div className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-              Time Taken
+          <div className="bg-white dark:bg-card border border-slate-200/80 dark:border-border/60 rounded-[24px] p-6 flex flex-col justify-between shadow-sm space-y-2">
+            <div className="flex items-center gap-1.5 text-[9px] font-bold uppercase tracking-wider text-slate-400">
+              <Clock className="w-3.5 h-3.5 text-sky-500" />
+              TIME TAKEN
             </div>
-            <div className="text-3xl font-extrabold text-foreground">
-              {formatDuration(results.timeTakenSeconds)}
+            <div className="text-3xl font-black text-slate-900 dark:text-slate-100">
+              {minutes} <span className="text-base font-bold text-slate-600">min</span> {seconds}{" "}
+              <span className="text-base font-bold text-slate-600">sec</span>
             </div>
-            <div className="text-xs text-muted-foreground font-medium">
-              You answered <span className="font-bold text-foreground">{answeredCount}</span> of 40 questions
+            <div className="text-[10px] text-slate-400 font-medium">
+              of 30 minutes allowed
+            </div>
+            <div className="w-full bg-slate-100 dark:bg-slate-800 rounded-full h-1.5 overflow-hidden">
+              <div
+                className="h-full bg-sky-500 transition-all duration-700"
+                style={{
+                  width: `${Math.min(
+                    (results.timeTakenSeconds / 1800) * 100,
+                    100
+                  )}%`,
+                }}
+              />
             </div>
           </div>
         </div>
 
-        {/* ── 2. Question Overview Grid (grouped by 4 sections matching UI) ── */}
-        <div className="bg-card border border-border rounded-3xl p-6 shadow-sm space-y-6">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+        {/* ── 2. Question Overview Grid (1-40) ── */}
+        <div className="bg-white dark:bg-card border border-slate-200/80 dark:border-border/60 rounded-[24px] p-6 shadow-sm space-y-4">
+          <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
-              <span className="w-2.5 h-2.5 rounded-full bg-primary" />
-              <h3 className="text-xs font-bold uppercase tracking-wider text-foreground">
-                Question Overview
+              <LayoutGrid className="w-4 h-4 text-sky-500" />
+              <h3 className="text-xs font-black uppercase tracking-wider text-slate-800 dark:text-slate-100">
+                QUESTION OVERVIEW
               </h3>
             </div>
 
             <div className="flex items-center gap-4 text-xs font-semibold">
-              <span className="flex items-center gap-1.5 text-emerald-600 dark:text-emerald-400">
+              <span className="flex items-center gap-1.5 text-emerald-600">
                 <span className="w-2.5 h-2.5 rounded-full bg-emerald-500" />
-                Correct ({results.score})
+                Correct
               </span>
-              <span className="flex items-center gap-1.5 text-red-600 dark:text-red-400">
-                <span className="w-2.5 h-2.5 rounded-full bg-red-500" />
-                Incorrect ({40 - results.score})
+              <span className="flex items-center gap-1.5 text-rose-500">
+                <span className="w-2.5 h-2.5 rounded-full bg-rose-500" />
+                Incorrect
               </span>
-              <span className="flex items-center gap-1.5 text-muted-foreground">
-                <span className="w-2.5 h-2.5 rounded-full bg-muted-foreground/30" />
-                Unanswered ({40 - answeredCount})
+              <span className="flex items-center gap-1.5 text-slate-400">
+                <span className="w-2.5 h-2.5 rounded-full bg-slate-300" />
+                Unanswered
               </span>
             </div>
           </div>
 
-          <div className="space-y-5">
-            {[
-              { num: 1, title: "SECTION 1 — CONVERSATION ABOUT BOOKING ACCOMMODATION", range: [1, 10] },
-              { num: 2, title: "SECTION 2 — GUIDE TOUR OF A UNIVERSITY CAMPUS", range: [11, 20] },
-              { num: 3, title: "SECTION 3 — DISCUSSION ABOUT A RESEARCH PROJECT", range: [21, 30] },
-              { num: 4, title: "SECTION 4 — ACADEMIC LECTURE ON MINING ARCHAEOLOGY", range: [31, 40] },
-            ].map((sec) => {
-              const secQs = results.questionResults.filter(
-                (q) => q.index >= sec.range[0] && q.index <= sec.range[1]
-              );
+          <div className="grid grid-cols-10 sm:grid-cols-20 gap-1.5">
+            {results.questionResults.map((q) => {
+              const isAns = q.userAnswer.trim().length > 0;
+              const colorClass = !isAns
+                ? "bg-slate-50 text-slate-400 border-slate-200"
+                : q.isCorrect
+                ? "bg-emerald-50 text-emerald-700 border-emerald-200 font-bold"
+                : "bg-rose-50 text-rose-700 border-rose-200 font-bold";
 
               return (
-                <div key={sec.num} className="space-y-2">
-                  <div className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground">
-                    {sec.title}
-                  </div>
-                  <div className="grid grid-cols-5 sm:grid-cols-10 gap-2">
-                    {secQs.map((q) => {
-                      const isAns = q.userAnswer.trim().length > 0;
-                      const colorClass = !isAns
-                        ? "bg-muted/40 text-muted-foreground border-border"
-                        : q.isCorrect
-                        ? "bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border-emerald-500/30 font-bold"
-                        : "bg-red-500/15 text-red-600 dark:text-red-400 border-red-500/30 font-bold";
-
-                      return (
-                        <div
-                          key={q.index}
-                          className={cn(
-                            "h-10 rounded-2xl border text-xs flex items-center justify-center font-bold transition-all shadow-2xs",
-                            colorClass
-                          )}
-                        >
-                          {q.index}
-                        </div>
-                      );
-                    })}
-                  </div>
+                <div
+                  key={q.index}
+                  className={cn(
+                    "h-8 rounded-xl border text-xs flex items-center justify-center transition-all",
+                    colorClass
+                  )}
+                >
+                  {q.index}
                 </div>
               );
             })}
           </div>
         </div>
 
-        {/* ── 3. Band Scale & Question Type Breakdown ── */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        {/* ── 3. Band Score Scale & Question Type Performance (2 Columns) ── */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
           <BandScoreScale bandScore={results.bandScore} />
 
           {/* Question Type Performance */}
-          <div className="bg-card border border-border rounded-3xl p-6 shadow-sm space-y-4">
-            <h3 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-              Question Type Performance
-            </h3>
+          <div className="bg-white dark:bg-card border border-slate-200/80 dark:border-border/60 rounded-[24px] p-6 shadow-sm space-y-3">
+            <div className="flex items-center gap-2">
+              <Target className="w-4 h-4 text-sky-500" />
+              <h3 className="text-xs font-black uppercase tracking-wider text-slate-800 dark:text-slate-100">
+                QUESTION TYPE PERFORMANCE
+              </h3>
+            </div>
 
-            <div className="space-y-3">
+            <div className="space-y-3 pt-1">
               {results.questionTypeScores.map((qt) => (
-                <div key={qt.type} className="flex items-center justify-between text-xs py-1 border-b border-border last:border-0">
-                  <span className="font-medium text-foreground">{qt.label}</span>
-                  <span className="font-bold text-muted-foreground">
-                    {qt.correct} / {qt.total}{" "}
-                    <span className="text-foreground">
-                      ({(qt.percentage ?? (qt.total > 0 ? (qt.correct / qt.total) * 100 : 0)).toFixed(0)}%)
+                <div key={qt.type} className="space-y-1">
+                  <div className="flex items-center justify-between text-xs">
+                    <span className="font-semibold text-slate-700 dark:text-slate-300">
+                      {qt.label}
                     </span>
-                  </span>
+                    <span className="text-slate-400 font-bold text-[11px]">
+                      {qt.correct}/{qt.total}{" "}
+                      <span className="text-slate-500 font-semibold">
+                        ({qt.percentage.toFixed(0)}%)
+                      </span>
+                    </span>
+                  </div>
+                  <div className="w-full bg-slate-100 dark:bg-slate-800 rounded-full h-1.5 overflow-hidden">
+                    <div
+                      className={`h-full rounded-full transition-all duration-700 ${
+                        qt.percentage >= 60 ? "bg-sky-500" : "bg-rose-500"
+                      }`}
+                      style={{ width: `${qt.percentage}%` }}
+                    />
+                  </div>
                 </div>
               ))}
             </div>
           </div>
         </div>
 
-        {/* ── 4. Section Performance ── */}
-        <div className="bg-card border border-border rounded-3xl p-6 shadow-sm space-y-4">
-          <h3 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-            Section Performance
-          </h3>
+        {/* ── 4. Section Performance & Recharts Time Distribution (2 Columns) ── */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+          {/* Section Performance */}
+          <div className="bg-white dark:bg-card border border-slate-200/80 dark:border-border/60 rounded-[24px] p-6 shadow-sm space-y-3">
+            <h3 className="text-xs font-black uppercase tracking-wider text-slate-800 dark:text-slate-100">
+              SECTION PERFORMANCE
+            </h3>
 
-          <div className="divide-y divide-border">
-            {results.sectionScores.map((ss) => (
-              <SectionPerformanceBar key={ss.sectionIndex} score={ss} />
-            ))}
+            <div className="space-y-1">
+              {results.sectionScores.map((ss) => (
+                <SectionPerformanceBar key={ss.sectionIndex} score={ss} />
+              ))}
+            </div>
+          </div>
+
+          {/* Time Distribution via Shadcn / Recharts BarChart */}
+          <div className="bg-white dark:bg-card border border-slate-200/80 dark:border-border/60 rounded-[24px] p-6 shadow-sm space-y-2">
+            <div className="flex items-center justify-between">
+              <h3 className="text-xs font-black uppercase tracking-wider text-slate-800 dark:text-slate-100">
+                TIME DISTRIBUTION
+              </h3>
+              <span className="text-[10px] font-bold text-slate-400 uppercase">
+                Minutes per section
+              </span>
+            </div>
+
+            <div className="pt-2">
+              <ChartContainer config={chartConfig} className="h-44 w-full aspect-auto">
+                <BarChart data={chartData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
+                  <CartesianGrid vertical={false} strokeDasharray="3 3" opacity={0.3} />
+                  <XAxis
+                    dataKey="section"
+                    tickLine={false}
+                    tickMargin={8}
+                    axisLine={false}
+                    className="text-[11px] font-bold fill-slate-500"
+                  />
+                  <YAxis
+                    tickLine={false}
+                    axisLine={false}
+                    tickMargin={4}
+                    unit="m"
+                    className="text-[10px] fill-slate-400"
+                  />
+                  <ChartTooltip
+                    cursor={{ fill: "rgba(2, 132, 199, 0.06)" }}
+                    content={<ChartTooltipContent hideIndicator />}
+                  />
+                  <Bar
+                    dataKey="minutes"
+                    fill="#0284c7"
+                    radius={[8, 8, 0, 0]}
+                    maxBarSize={40}
+                  />
+                </BarChart>
+              </ChartContainer>
+            </div>
           </div>
         </div>
 
-        {/* ── 5. Question Review Section ── */}
-        <QuestionReviewSection questionResults={results.questionResults} />
+        {/* ── 5. Question Review Section with Tabs (All / Incorrect / Correct) ── */}
+        <div id="review-section">
+          <QuestionReviewSection questionResults={results.questionResults} />
+        </div>
 
         {/* ── 6. Recommendations ── */}
         {results.recommendations?.length > 0 && (
-          <div className="bg-amber-500/5 border border-amber-500/20 rounded-3xl p-6 space-y-4">
+          <div className="bg-white dark:bg-card border border-slate-200/80 dark:border-border/60 rounded-[24px] p-6 shadow-sm space-y-3.5">
             <div className="flex items-center gap-2">
-              <Sparkles className="w-5 h-5 text-amber-500" />
-              <h3 className="text-sm font-bold text-amber-600 dark:text-amber-400 uppercase tracking-wider">
+              <Lightbulb className="w-4 h-4 text-amber-500" />
+              <h3 className="text-xs font-black uppercase tracking-wider text-amber-600 dark:text-amber-400">
                 RECOMMENDATIONS
               </h3>
             </div>
 
-            <ul className="space-y-2.5">
+            <div className="space-y-2.5">
               {results.recommendations.map((rec, i) => (
-                <li key={i} className="flex items-start gap-3 text-sm text-foreground/90">
-                  <span className="flex-shrink-0 w-5 h-5 rounded-full bg-amber-500/20 text-amber-600 dark:text-amber-400 font-bold text-xs flex items-center justify-center mt-0.5">
+                <div
+                  key={i}
+                  className="bg-slate-50 dark:bg-slate-800/40 border border-slate-200/70 dark:border-slate-700/60 rounded-2xl p-3.5 flex items-center gap-3 text-xs sm:text-sm font-medium text-slate-700 dark:text-slate-300"
+                >
+                  <span className="w-5 h-5 rounded-full bg-amber-100 dark:bg-amber-950/60 text-amber-700 dark:text-amber-400 font-bold text-xs flex items-center justify-center shrink-0">
                     {i + 1}
                   </span>
                   <span>{rec}</span>
-                </li>
+                </div>
               ))}
-            </ul>
+            </div>
           </div>
         )}
 
-        {/* ── 7. Email Report Action Bar ── */}
-        <div className="bg-card border border-border rounded-3xl p-6 flex flex-col sm:flex-row items-center justify-between gap-4 shadow-sm">
+        {/* ── 7. Save or Email PDF Report Action Banner ── */}
+        <div className="bg-white dark:bg-card border border-slate-200/80 dark:border-border/60 rounded-[24px] p-6 flex flex-col sm:flex-row items-center justify-between gap-4 shadow-sm">
           <div>
-            <h4 className="text-base font-bold text-foreground">Save or Email Your PDF Report</h4>
-            <p className="text-xs text-muted-foreground mt-0.5">
+            <h4 className="text-sm font-bold text-slate-900 dark:text-slate-100">
+              Save or Email Your PDF Report
+            </h4>
+            <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
               Get a full breakdown sent to your email address.
             </p>
           </div>
 
           {emailSent ? (
-            <div className="inline-flex items-center gap-2 text-sm font-bold text-emerald-600 dark:text-emerald-400 bg-emerald-500/10 px-4 py-2.5 rounded-xl border border-emerald-500/20">
+            <div className="inline-flex items-center gap-2 text-xs font-bold text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/50 px-4 py-2.5 rounded-full border border-emerald-200 dark:border-emerald-800">
               <CheckCircle className="w-4 h-4" /> PDF Report Emailed!
             </div>
           ) : (
             <Button
-              className="h-11 rounded-xl px-6 bg-primary"
+              className="h-10 rounded-full px-6 bg-[#0284c7] hover:bg-[#0369a1] text-white text-xs font-bold shadow-[0_3px_12px_rgba(2,132,199,0.25)] transition-all"
+              disabled={sendingEmail}
               onClick={() => {
                 if (userSession?.email) {
                   handleSendReport();
@@ -428,62 +555,79 @@ function ListeningResultsContent() {
                 }
               }}
             >
-              <Mail className="w-4 h-4 mr-2" />
-              Get My Full Report
+              <Mail className="w-3.5 h-3.5 mr-2" />
+              {sendingEmail ? "Sending..." : "Get My Full Report"}
             </Button>
           )}
         </div>
 
-        {/* ── 8. Bottom Navigation Actions ── */}
-        <div className="flex gap-3 pt-4">
+        {/* ── 8. Bottom Action Buttons (Review / Retake / Back to Home) ── */}
+        {/* <div className="flex flex-col sm:flex-row items-center justify-between gap-3 pt-2">
           <Button
             variant="outline"
-            className="flex-1 h-12 rounded-xl text-sm font-semibold"
+            className="w-full sm:w-auto rounded-full px-6 h-11 text-xs font-bold border-slate-200 bg-white hover:bg-slate-50 text-slate-700"
             onClick={() => {
-              safeSessionStorage.removeItem("ielts_listening_draft");
-              router.push("/listening/test?fresh=true");
+              const el = document.getElementById("review-section");
+              el?.scrollIntoView({ behavior: "smooth" });
             }}
           >
-            <RotateCcw className="w-4 h-4 mr-2" />
-            Practice Again
+            <Eye className="w-4 h-4 mr-2 text-slate-500" />
+            Review Answers
           </Button>
-          <Button
-            className="flex-1 h-12 rounded-xl text-sm font-semibold bg-primary"
-            onClick={() => router.push("/")}
-          >
-            <Home className="w-4 h-4 mr-2" />
-            Back to Home
-          </Button>
-        </div>
+
+          <div className="flex items-center gap-3 w-full sm:w-auto">
+            <Button
+              variant="outline"
+              className="flex-1 sm:flex-none rounded-full px-6 h-11 text-xs font-bold border-slate-200 bg-white hover:bg-slate-50 text-slate-700"
+              onClick={() => router.push("/")}
+            >
+              <Home className="w-4 h-4 mr-2 text-slate-500" />
+              Back to Home
+            </Button>
+
+            <Button
+              className="flex-1 sm:flex-none rounded-full px-8 h-11 text-xs font-bold bg-[#0284c7] hover:bg-[#0369a1] text-white shadow-[0_4px_14px_rgba(2,132,199,0.3)] transition-all"
+              onClick={() => {
+                safeSessionStorage.removeItem("ielts_listening_draft");
+                router.push("/listening/test?fresh=true");
+              }}
+            >
+              <RotateCcw className="w-4 h-4 mr-2" />
+              Practice Again
+            </Button>
+          </div>
+        </div> */}
       </div>
 
       {/* ── Unlock / Email Modal for non-logged-in users ── */}
       {showEmailModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-background/80 backdrop-blur-sm animate-in fade-in">
-          <div className="w-full max-w-md bg-card border border-border rounded-3xl p-6 sm:p-8 text-center space-y-6 shadow-2xl">
-            <div className="w-14 h-14 rounded-2xl bg-primary text-primary-foreground flex items-center justify-center mx-auto shadow-md">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-sm animate-in fade-in">
+          <div className="w-full max-w-md bg-white dark:bg-card border border-slate-200 dark:border-border rounded-[28px] p-6 sm:p-8 text-center space-y-6 shadow-2xl">
+            <div className="w-14 h-14 rounded-2xl bg-sky-50 dark:bg-sky-950/60 border border-sky-200 dark:border-sky-800 text-[#0284c7] flex items-center justify-center mx-auto shadow-sm">
               <Sparkles className="w-7 h-7" />
             </div>
 
             <div>
-              <h3 className="text-xl font-bold text-foreground">Unlock Your Full IELTS Report</h3>
-              <p className="text-xs text-muted-foreground mt-2 leading-relaxed">
-                Save your results, view detailed analysis, and receive a complete PDF report in your email.
+              <h3 className="text-lg font-black text-slate-900 dark:text-slate-100 uppercase">
+                Unlock Your Full IELTS Report
+              </h3>
+              <p className="text-xs text-slate-500 dark:text-slate-400 mt-2 leading-relaxed">
+                Sign in to save your results, track your progress over time, and receive a complete PDF breakdown in your email.
               </p>
             </div>
 
             <div className="space-y-3 pt-2">
               <Button
-                className="w-full h-12 rounded-xl text-sm font-bold bg-primary"
+                className="w-full h-11 rounded-full text-xs font-bold bg-[#0284c7] hover:bg-[#0369a1] text-white shadow-sm"
                 onClick={() => router.push("/auth/sign-in")}
               >
-                Get My Full Report
+                Sign In to Get Report
                 <ChevronRight className="w-4 h-4 ml-1" />
               </Button>
 
               <button
                 type="button"
-                className="text-xs text-muted-foreground hover:text-foreground font-medium transition-colors"
+                className="text-xs text-slate-400 hover:text-slate-600 font-semibold transition-colors block mx-auto"
                 onClick={() => setShowEmailModal(false)}
               >
                 Continue without saving
@@ -500,8 +644,8 @@ export default function ListeningResultsPage() {
   return (
     <Suspense
       fallback={
-        <div className="min-h-screen bg-background flex items-center justify-center">
-          <div className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin" />
+        <div className="min-h-screen bg-[#f8fafc] dark:bg-background flex items-center justify-center">
+          <div className="w-8 h-8 border-2 border-sky-500 border-t-transparent rounded-full animate-spin" />
         </div>
       }
     >

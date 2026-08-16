@@ -4,13 +4,39 @@
 
 import { useState, useEffect, useRef, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { Headphones, Flag, Send, ChevronLeft, ChevronRight, Loader2, Info, HelpCircle } from "lucide-react";
+import {
+  Headphones,
+  Flag,
+  Send,
+  ChevronLeft,
+  ChevronRight,
+  Loader2,
+  Info,
+  HelpCircle,
+  Users,
+  Clock,
+  BarChart2,
+  FileText,
+  ChevronDown,
+  ChevronUp,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { AnimatedThemeToggler } from "@/components/ui/animated-theme-toggler";
 
-import type { ListeningTest, ListeningQuestion, ListeningSection } from "@/lib/listening-types";
-import { generateListeningTest, evaluateListeningTest } from "@/lib/listening-types";
-import { safeSessionStorage, describeError, withTimeout } from "@/lib/reading-network-utils";
+import type {
+  ListeningTest,
+  ListeningQuestion,
+  ListeningSection,
+} from "@/lib/listening-types";
+import {
+  generateListeningTest,
+  evaluateListeningTest,
+} from "@/lib/listening-types";
+import {
+  safeSessionStorage,
+  describeError,
+  withTimeout,
+} from "@/lib/reading-network-utils";
 import { trpc } from "@/server/client";
 
 import { AudioPlayer } from "@/components/listening/audio-player";
@@ -43,6 +69,7 @@ function ListeningTestContent() {
   const [activeQ, setActiveQ] = useState(1);
   const [answers, setAnswers] = useState<Record<number, string>>({});
   const [flags, setFlags] = useState<Set<number>>(new Set());
+  const [showTranscript, setShowTranscript] = useState(false);
 
   // Timer & Modals
   const [timeLeft, setTimeLeft] = useState(TOTAL_SECONDS);
@@ -88,7 +115,8 @@ function ListeningTestContent() {
         }
 
         // Check whether AI generation flag is enabled
-        const generateWithAI = process.env.NEXT_PUBLIC_GENERATE_LISTENING_WITH_AI === "true";
+        const generateWithAI =
+          process.env.NEXT_PUBLIC_GENERATE_LISTENING_WITH_AI === "true";
 
         let newTest: ListeningTest | null = null;
 
@@ -106,7 +134,11 @@ function ListeningTestContent() {
             if (res.ok) {
               const json = await res.json();
               const dbTest = json?.result?.data;
-              if (dbTest && dbTest.sections?.length > 0 && dbTest.questions?.length === 40) {
+              if (
+                dbTest &&
+                dbTest.sections?.length > 0 &&
+                dbTest.questions?.length === 40
+              ) {
                 newTest = dbTest as ListeningTest;
               }
             }
@@ -116,8 +148,12 @@ function ListeningTestContent() {
 
           // Fallback to local random test if DB is empty
           if (!newTest) {
-            const { FALLBACK_LISTENING_TESTS } = await import("@/lib/listening-fallback-tests");
-            const randomIndex = Math.floor(Math.random() * FALLBACK_LISTENING_TESTS.length);
+            const { FALLBACK_LISTENING_TESTS } = await import(
+              "@/lib/listening-fallback-tests"
+            );
+            const randomIndex = Math.floor(
+              Math.random() * FALLBACK_LISTENING_TESTS.length
+            );
             newTest = FALLBACK_LISTENING_TESTS[randomIndex];
           }
         }
@@ -135,10 +171,9 @@ function ListeningTestContent() {
               difficulty: newTest.difficulty,
               sections: newTest.sections,
               questions: newTest.questions,
-              audioUrls: newTest.audioUrls || {},
-              transcripts: newTest.transcripts || {},
               topics: newTest.topics,
               totalQuestions: newTest.totalQuestions,
+              audioUrls: newTest.audioUrls,
             });
           } catch {
             /* background save ignore */
@@ -159,15 +194,15 @@ function ListeningTestContent() {
     };
   }, [isFreshRequest]);
 
-  // ── 2. Timer countdown ──
+  // ── 2. Timer Countdown ──
   useEffect(() => {
-    if (loading || submitting || !test) return;
+    if (loading || submitting) return;
 
     timerIdRef.current = setInterval(() => {
       setTimeLeft((prev) => {
         if (prev <= 1) {
           clearInterval(timerIdRef.current!);
-          handleSubmit(true); // Auto-submit when time reaches 0
+          handleSubmitTest(); // Auto submit when time runs out
           return 0;
         }
         return prev - 1;
@@ -177,11 +212,11 @@ function ListeningTestContent() {
     return () => {
       if (timerIdRef.current) clearInterval(timerIdRef.current);
     };
-  }, [loading, submitting, test]);
+  }, [loading, submitting]);
 
-  // ── 3. Autosave draft ──
+  // ── 3. Auto-save draft to sessionStorage (debounced) ──
   useEffect(() => {
-    if (!test || loading || submitting) return;
+    if (!test || loading) return;
 
     const timer = setTimeout(() => {
       safeSessionStorage.setItem("ielts_listening_draft", {
@@ -193,7 +228,7 @@ function ListeningTestContent() {
     }, AUTOSAVE_DEBOUNCE_MS);
 
     return () => clearTimeout(timer);
-  }, [test, answers, flags, timeLeft, loading, submitting]);
+  }, [test, answers, flags, timeLeft, loading]);
 
   // ── Handlers ──
   const handleAnswer = (qIdx: number, val: string) => {
@@ -209,46 +244,52 @@ function ListeningTestContent() {
     });
   };
 
-  const handleSelectQ = (qNum: number) => {
-    setActiveQ(qNum);
-
-    // Switch active section tab if target question belongs to another section
+  const handleSelectQ = (qIdx: number) => {
+    setActiveQ(qIdx);
+    // Switch active section if the question belongs to another section
     if (test) {
-      const targetSectionIdx = test.questions.find((q) => q.index === qNum)?.sectionIndex;
-      if (typeof targetSectionIdx === "number" && targetSectionIdx !== activeSection) {
-        setActiveSection(targetSectionIdx);
+      const sIdx = test.sections.findIndex((s) => {
+        const [start, end] = s.questionRange || [1, 10];
+        return qIdx >= start && qIdx <= end;
+      });
+      if (sIdx !== -1 && sIdx !== activeSection) {
+        setActiveSection(sIdx);
       }
     }
   };
 
-  const handleNextQ = () => {
-    if (activeQ < 40) handleSelectQ(activeQ + 1);
-  };
-
   const handlePrevQ = () => {
-    if (activeQ > 1) handleSelectQ(activeQ - 1);
+    if (activeQ > 1) {
+      handleSelectQ(activeQ - 1);
+    }
   };
 
-  const handleSubmit = async (autoSubmit = false) => {
+  const handleNextQ = () => {
+    if (activeQ < 40) {
+      handleSelectQ(activeQ + 1);
+    }
+  };
+
+  // ── 4. Submit & Evaluate Test ──
+  const handleSubmitTest = async () => {
     if (!test || submitting) return;
     setSubmitting(true);
     setShowSubmitModal(false);
 
-    const timeTaken = Math.max(1, Math.floor((Date.now() - startTimeRef.current) / 1000));
-
-    // Convert numeric keys to string keys for API payload
-    const strAnswers: Record<string, string> = {};
-    Object.entries(answers).forEach(([k, v]) => {
-      strAnswers[k] = v;
-    });
-
     try {
-      // Evaluate results
+      const timeTaken = TOTAL_SECONDS - timeLeft;
+      const strAnswers: Record<string, string> = {};
+      Object.entries(answers).forEach(([k, v]) => {
+        strAnswers[k] = v;
+      });
+
+      // Grade test locally / evaluate with AI recommendations
       const results = await withTimeout(
         evaluateListeningTest({
-          answers: strAnswers,
-          timeTakenSeconds: timeTaken,
           test,
+          answers: strAnswers,
+          userAnswers: strAnswers,
+          timeTakenSeconds: timeTaken,
         }),
         30000,
         "Evaluating test results..."
@@ -288,9 +329,11 @@ function ListeningTestContent() {
   // ── Render Loading state ──
   if (loading) {
     return (
-      <div className="min-h-screen bg-background flex flex-col items-center justify-center p-6 space-y-4 text-center">
-        <div className="w-12 h-12 rounded-full border-4 border-primary border-t-transparent animate-spin" />
-        <h2 className="text-xl font-bold text-foreground">Preparing your IELTS Listening Test...</h2>
+      <div className="min-h-screen bg-[#fbfcfd] dark:bg-background flex flex-col items-center justify-center p-6 space-y-4 text-center">
+        <div className="w-12 h-12 rounded-full border-4 border-sky-500 border-t-transparent animate-spin" />
+        <h2 className="text-xl font-bold text-slate-800 dark:text-slate-200">
+          Preparing your IELTS Listening Test...
+        </h2>
       </div>
     );
   }
@@ -307,35 +350,37 @@ function ListeningTestContent() {
   ).length;
 
   return (
-    <div className="h-screen bg-background flex flex-col overflow-hidden">
-      {/* ── TOP NAVIGATION BAR ── */}
-      <header className="px-3 sm:px-6 py-2 sm:py-2.5 border-b border-border bg-card flex items-center justify-between gap-2 sm:gap-4 shrink-0 shadow-sm overflow-x-auto scrollbar-none">
-        {/* Module Title Badge & Theme Toggler */}
-        <div className="flex items-center gap-2.5 sm:gap-3 bg-muted/30 px-3 py-2 rounded-2xl border border-border">
-          <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-2xl bg-primary text-primary-foreground flex items-center justify-center shrink-0">
-            <Headphones className="w-4 h-4 sm:w-5 sm:h-5" />
+    <div className="h-screen bg-[#f8fafc] dark:bg-background flex flex-col overflow-hidden">
+      {/* ── TOP FLOATING HEADER (3 Separate Cards) ── */}
+      <header className="px-4 sm:px-6 pt-3 pb-2 flex flex-col md:flex-row md:items-center justify-between gap-4 shrink-0 overflow-x-auto scrollbar-none">
+        {/* Left Card: Brand Badge + Progress + Theme Toggler */}
+        <div className="flex items-center gap-3 bg-white dark:bg-card px-4 py-2.5 rounded-2xl border border-slate-200/80 dark:border-border/60 shadow-sm shrink-0">
+          <div className="w-9 h-9 rounded-xl bg-[#0284c7] text-white flex items-center justify-center shrink-0 shadow-sm">
+            <Headphones className="w-4 h-4" />
           </div>
           <div>
-            <h1 className="text-xs sm:text-sm font-bold text-foreground leading-tight">IELTS Listening</h1>
-            <div className="w-20 sm:w-24 h-1.5 bg-muted rounded-full overflow-hidden mt-1">
+            <h1 className="text-xs sm:text-sm font-bold text-slate-800 dark:text-slate-100 leading-tight">
+              IELTS Listening
+            </h1>
+            <div className="w-20 sm:w-24 h-1.5 bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden mt-1">
               <div
-                className="h-full bg-primary transition-all duration-300"
+                className="h-full bg-[#0284c7] transition-all duration-300"
                 style={{ width: `${(totalAnsweredCount / 40) * 100}%` }}
               />
             </div>
-            <span className="text-[10px] text-muted-foreground font-semibold">
+            <span className="text-[10px] text-slate-400 dark:text-slate-500 font-semibold">
               {totalAnsweredCount}/40
             </span>
           </div>
 
           {/* Theme Toggler Button */}
-          <div className="ml-1 pl-2 border-l border-border">
-            <AnimatedThemeToggler className="w-8 h-8 rounded-full border border-border bg-card flex items-center justify-center text-foreground hover:bg-muted transition-colors" />
+          <div className="ml-1 pl-2 border-l border-slate-200 dark:border-slate-800">
+            <AnimatedThemeToggler className="w-8 h-8 rounded-full border border-slate-200 dark:border-slate-700 bg-white dark:bg-card flex items-center justify-center text-slate-600 dark:text-slate-300 hover:bg-slate-50 transition-colors" />
           </div>
         </div>
 
-        {/* Section Selector Tabs */}
-        <div className="flex-1 min-w-[240px] max-w-xl">
+        {/* Center Card: Section Tabs */}
+        <div className="flex-1 max-w-2xl">
           <SectionTabs
             sections={test.sections}
             activeSection={activeSection}
@@ -348,19 +393,21 @@ function ListeningTestContent() {
           />
         </div>
 
-        {/* Timer */}
-        <ListeningTimer secondsLeft={timeLeft} />
+        {/* Right Card: Timer */}
+        <div className="shrink-0">
+          <ListeningTimer secondsLeft={timeLeft} />
+        </div>
       </header>
 
       {/* ── MOBILE VIEW TOGGLE (visible only on screens < lg) ── */}
-      <div className="lg:hidden flex border-b border-border bg-muted/20 px-4 py-2 gap-2">
+      <div className="lg:hidden flex border-b border-slate-200/80 dark:border-border/60 bg-white dark:bg-card px-4 py-2 gap-2">
         <button
           type="button"
           onClick={() => setMobileView("audio")}
           className={`flex-1 py-2 text-xs font-bold rounded-xl border flex items-center justify-center gap-1.5 transition-all ${
             mobileView === "audio"
-              ? "bg-primary text-primary-foreground border-primary shadow"
-              : "bg-card text-muted-foreground border-border"
+              ? "bg-[#0284c7] text-white border-[#0284c7] shadow"
+              : "bg-white dark:bg-card text-slate-500 border-slate-200 dark:border-border"
           }`}
         >
           <Info className="w-3.5 h-3.5" />
@@ -371,8 +418,8 @@ function ListeningTestContent() {
           onClick={() => setMobileView("questions")}
           className={`flex-1 py-2 text-xs font-bold rounded-xl border flex items-center justify-center gap-1.5 transition-all ${
             mobileView === "questions"
-              ? "bg-primary text-primary-foreground border-primary shadow"
-              : "bg-card text-muted-foreground border-border"
+              ? "bg-[#0284c7] text-white border-[#0284c7] shadow"
+              : "bg-white dark:bg-card text-slate-500 border-slate-200 dark:border-border"
           }`}
         >
           <HelpCircle className="w-3.5 h-3.5" />
@@ -381,38 +428,132 @@ function ListeningTestContent() {
       </div>
 
       {/* ── MAIN WORKSPACE (SPLIT PANE on lg+, TABBED on mobile) ── */}
-      <main className="flex-1 min-h-0 grid grid-cols-1 lg:grid-cols-12 gap-4 p-3 sm:p-4 overflow-hidden">
+      <main className="flex-1 min-h-0 grid grid-cols-1 lg:grid-cols-12 gap-4 px-4 sm:px-6 py-2 overflow-hidden">
         {/* Left Pane — Audio Player & Info */}
         <section
-          className={`lg:col-span-6 h-full min-h-0 ${
+          className={`lg:col-span-6 h-full min-h-0 overflow-y-auto space-y-4 ${
             mobileView === "audio" ? "block" : "hidden lg:block"
           }`}
         >
-          <div className="bg-card border border-border rounded-2xl p-4 sm:p-5 space-y-4 h-full overflow-y-auto">
-            {/* Section Header */}
-            <div className="space-y-2">
-              <h2 className="text-base font-bold text-foreground">{currentSection.title}</h2>
-              <p className="text-sm text-muted-foreground">{currentSection.description}</p>
-              <div className="flex flex-wrap gap-2">
-                <span className="inline-flex items-center rounded-md bg-muted px-2 py-1 text-xs font-medium text-muted-foreground ring-1 ring-inset ring-border/20">
-                  {currentSection.difficulty}
+          <div className="space-y-4">
+            {/* Section Header Card */}
+            <div className="bg-white dark:bg-card border border-slate-200/80 dark:border-border/60 rounded-[28px] p-6 shadow-sm space-y-2">
+              <div className="flex items-center gap-2">
+                <span className="px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider bg-sky-50 text-sky-600 border border-sky-200">
+                  {currentSection.difficulty || "EASY"}
                 </span>
-                <span className="inline-flex items-center rounded-md bg-muted px-2 py-1 text-xs font-medium text-muted-foreground ring-1 ring-inset ring-border/20">
-                  Speakers: {currentSection.speakers || 2}
-                </span>
-                <span className="inline-flex items-center rounded-md bg-muted px-2 py-1 text-xs font-medium text-muted-foreground ring-1 ring-inset ring-border/20">
+                <span className="text-xs text-slate-400 font-semibold">
                   ~{currentSection.durationMinutes || 7} minutes
                 </span>
               </div>
+              <h2 className="text-lg sm:text-xl font-black text-slate-900 dark:text-slate-100 uppercase tracking-tight">
+                {currentSection.title}
+              </h2>
+              <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400">
+                {currentSection.description}
+              </p>
             </div>
-            
-            {/* Audio Player */}
-            <AudioPlayer audioUrl={currentSection.audioUrl || (test.audioUrls && (test.audioUrls[String(activeSection)] || test.audioUrls[activeSection])) || ""} />
-            
-            {/* Section Instructions */}
-            <div className="text-sm text-muted-foreground bg-muted/30 rounded-xl p-4 border border-border">
-              <p>Listen carefully to the audio for this section. Answer questions {pStartQ}-{pEndQ} based on what you hear.</p>
+
+            {/* Audio Waveform Player */}
+            <AudioPlayer
+              audioUrl={
+                currentSection.audioUrl ||
+                (test.audioUrls &&
+                  (test.audioUrls[String(activeSection)] ||
+                    test.audioUrls[activeSection])) ||
+                ""
+              }
+            />
+
+            {/* Section Meta Pills: Speakers, Duration, Difficulty */}
+            <div className="grid grid-cols-3 gap-3">
+              <div className="bg-white dark:bg-card border border-slate-200/80 dark:border-border/60 rounded-2xl p-3.5 flex items-center gap-3 shadow-sm">
+                <div className="w-8 h-8 rounded-xl bg-sky-50 dark:bg-sky-950/60 border border-sky-100 text-sky-500 flex items-center justify-center shrink-0">
+                  <Users className="w-4 h-4" />
+                </div>
+                <div className="overflow-hidden">
+                  <span className="text-[9px] font-bold text-slate-400 uppercase tracking-wider block">
+                    SPEAKERS
+                  </span>
+                  <span className="text-xs font-bold text-slate-800 dark:text-slate-200 truncate block">
+                    {currentSection.speakers || "Two speakers"}
+                  </span>
+                </div>
+              </div>
+
+              <div className="bg-white dark:bg-card border border-slate-200/80 dark:border-border/60 rounded-2xl p-3.5 flex items-center gap-3 shadow-sm">
+                <div className="w-8 h-8 rounded-xl bg-sky-50 dark:bg-sky-950/60 border border-sky-100 text-sky-500 flex items-center justify-center shrink-0">
+                  <Clock className="w-4 h-4" />
+                </div>
+                <div className="overflow-hidden">
+                  <span className="text-[9px] font-bold text-slate-400 uppercase tracking-wider block">
+                    DURATION
+                  </span>
+                  <span className="text-xs font-bold text-slate-800 dark:text-slate-200 truncate block">
+                    {currentSection.durationMinutes || "7"}:00
+                  </span>
+                </div>
+              </div>
+
+              <div className="bg-white dark:bg-card border border-slate-200/80 dark:border-border/60 rounded-2xl p-3.5 flex items-center gap-3 shadow-sm">
+                <div className="w-8 h-8 rounded-xl bg-sky-50 dark:bg-sky-950/60 border border-sky-100 text-sky-500 flex items-center justify-center shrink-0">
+                  <BarChart2 className="w-4 h-4" />
+                </div>
+                <div className="overflow-hidden">
+                  <span className="text-[9px] font-bold text-slate-400 uppercase tracking-wider block">
+                    DIFFICULTY
+                  </span>
+                  <span className="text-xs font-bold text-slate-800 dark:text-slate-200 truncate capitalize block">
+                    {currentSection.difficulty || "Easy"}
+                  </span>
+                </div>
+              </div>
             </div>
+
+            {/* Section Instructions Card */}
+            <div className="bg-white dark:bg-card border border-slate-200/80 dark:border-border/60 rounded-2xl p-4 flex items-start gap-3 shadow-sm text-xs text-slate-600 dark:text-slate-300">
+              <div className="w-8 h-8 rounded-xl bg-slate-100 dark:bg-slate-800 flex items-center justify-center shrink-0 text-slate-500 mt-0.5">
+                <FileText className="w-4 h-4" />
+              </div>
+              <div className="space-y-0.5">
+                <span className="text-[10px] font-black uppercase tracking-wider text-slate-800 dark:text-slate-200 block">
+                  INSTRUCTIONS
+                </span>
+                <p className="leading-relaxed">
+                  You will hear a conversation between speakers. Listen carefully
+                  and answer questions {pStartQ}–{pEndQ}.
+                </p>
+              </div>
+            </div>
+
+            {/* Collapsible Transcript for Practice */}
+            {currentSection.transcript && (
+              <div className="bg-white dark:bg-card border border-slate-200/80 dark:border-border/60 rounded-2xl overflow-hidden shadow-sm">
+                <button
+                  type="button"
+                  onClick={() => setShowTranscript(!showTranscript)}
+                  className="w-full px-4 py-3 flex items-center justify-between text-xs font-bold text-slate-700 dark:text-slate-300 hover:bg-slate-50 transition-colors"
+                >
+                  <span className="flex items-center gap-2">
+                    <Headphones className="w-3.5 h-3.5 text-sky-500" />
+                    Show Transcript
+                    <span className="px-2 py-0.5 rounded text-[9px] bg-amber-50 text-amber-600 border border-amber-200 uppercase font-black">
+                      Practice Mode
+                    </span>
+                  </span>
+                  {showTranscript ? (
+                    <ChevronUp className="w-4 h-4 text-slate-400" />
+                  ) : (
+                    <ChevronDown className="w-4 h-4 text-slate-400" />
+                  )}
+                </button>
+                {showTranscript && (
+                  <div className="px-4 pb-4 pt-1 text-xs text-slate-600 dark:text-slate-300 leading-relaxed border-t border-slate-100 max-h-48 overflow-y-auto">
+                    {currentSection.transcript}
+                  </div>
+                )}
+              </div>
+            )}
           </div>
         </section>
 
@@ -444,74 +585,94 @@ function ListeningTestContent() {
       </main>
 
       {/* ── BOTTOM ACTION BAR ── */}
-      <footer className="px-3 sm:px-6 py-2.5 sm:py-3 border-t border-border bg-card flex items-center justify-between gap-2 sm:gap-4 shrink-0 shadow-md">
+      <footer className="px-4 sm:px-6 py-2.5 border-t border-slate-200/80 dark:border-border/60 bg-white dark:bg-card flex items-center justify-between gap-2 sm:gap-4 shrink-0 shadow-sm">
         <Button
           variant="outline"
           size="sm"
-          className="h-9 sm:h-10 rounded-xl px-3 sm:px-4 text-xs sm:text-sm"
+          className="h-9 sm:h-10 rounded-full px-4 sm:px-5 text-xs font-semibold border-slate-200 text-slate-600 hover:bg-slate-50"
           disabled={activeQ <= 1}
           onClick={handlePrevQ}
         >
-          <ChevronLeft className="w-4 h-4 sm:mr-1" />
-          <span className="hidden sm:inline">Previous</span>
+          <ChevronLeft className="w-4 h-4 mr-1" />
+          Previous
         </Button>
 
-        <div className="flex items-center gap-2 sm:gap-3">
-          <span className="text-xs font-semibold text-muted-foreground">
+        <div className="flex items-center gap-3 sm:gap-4">
+          <span className="text-xs font-bold text-slate-400 dark:text-slate-500">
             Q{activeQ} of 40
           </span>
 
           <Button
             variant="outline"
             size="sm"
-            className={`h-9 sm:h-10 rounded-xl px-3 sm:px-4 text-xs sm:text-sm ${
+            className={`h-9 rounded-full px-4 text-xs font-semibold border-slate-200 text-slate-600 hover:bg-slate-50 ${
               flags.has(activeQ)
-                ? "bg-amber-500/10 border-amber-500/30 text-amber-600 dark:text-amber-400"
+                ? "bg-amber-50 border-amber-300 text-amber-600 dark:text-amber-400"
                 : ""
             }`}
             onClick={() => toggleFlag(activeQ)}
           >
-            <Flag className="w-3.5 h-3.5 sm:mr-1.5" />
-            <span className="hidden sm:inline">{flags.has(activeQ) ? "Flagged" : "Flag"}</span>
+            <Flag className="w-3.5 h-3.5 mr-1.5 text-slate-400" />
+            <span>{flags.has(activeQ) ? "Flagged" : "Flag"}</span>
           </Button>
 
           <Button
-            className="h-9 sm:h-10 rounded-xl px-4 sm:px-6 text-xs sm:text-sm bg-primary"
+            size="sm"
+            className="h-9 rounded-full px-6 text-xs font-bold bg-[#0284c7] hover:bg-[#0369a1] text-white shadow-[0_3px_12px_rgba(2,132,199,0.3)] transition-all"
             disabled={submitting}
             onClick={() => setShowSubmitModal(true)}
           >
             {submitting ? (
-              <Loader2 className="w-4 h-4 sm:mr-2 animate-spin" />
+              <Loader2 className="w-3.5 h-3.5 animate-spin mr-1.5" />
             ) : (
-              <Send className="w-4 h-4 sm:mr-2" />
+              <Send className="w-3.5 h-3.5 mr-1.5" />
             )}
-            Submit
+            <span>Submit</span>
           </Button>
         </div>
 
         <Button
           variant="outline"
           size="sm"
-          className="h-9 sm:h-10 rounded-xl px-3 sm:px-4 text-xs sm:text-sm"
+          className="h-9 sm:h-10 rounded-full px-4 sm:px-5 text-xs font-semibold border-slate-200 text-slate-600 hover:bg-slate-50"
           disabled={activeQ >= 40}
           onClick={handleNextQ}
         >
-          <span className="hidden sm:inline">Next</span>
-          <ChevronRight className="w-4 h-4 sm:ml-1" />
+          Next
+          <ChevronRight className="w-4 h-4 ml-1" />
         </Button>
       </footer>
 
-      {/* Submit confirmation modal */}
+      {/* ── Submit Confirmation Dialog ── */}
       <SubmitDialog
         open={showSubmitModal}
         sections={test.sections}
         answers={answers}
-        onClose={() => setShowSubmitModal(false)}
-        onConfirm={() => handleSubmit(false)}
+        totalAnswered={totalAnsweredCount}
+        totalQuestions={40}
+        flaggedCount={flags.size}
+        timeLeft={timeLeft}
+        isSubmitting={submitting}
+        onCancel={() => setShowSubmitModal(false)}
+        onConfirm={handleSubmitTest}
       />
 
-      {/* Error banner modal */}
-      <ErrorModal banner={banner} onClose={() => setBanner(null)} />
+      {/* ── Error Banner Modal ── */}
+      {banner && (
+        <ErrorModal
+          isOpen={true}
+          title={banner.title}
+          message={banner.message}
+          actionLabel={banner.actionLabel}
+          onAction={() => {
+            setBanner(null);
+            if (banner.actionLabel === "Retry Generation") {
+              window.location.reload();
+            }
+          }}
+          onClose={() => setBanner(null)}
+        />
+      )}
     </div>
   );
 }
@@ -520,9 +681,8 @@ export default function ListeningTestPage() {
   return (
     <Suspense
       fallback={
-        <div className="min-h-screen bg-background flex flex-col items-center justify-center p-6 text-center space-y-3">
-          <div className="w-10 h-10 rounded-full border-4 border-primary border-t-transparent animate-spin" />
-          <p className="text-sm text-muted-foreground font-medium">Loading listening test...</p>
+        <div className="min-h-screen bg-[#fbfcfd] dark:bg-background flex items-center justify-center">
+          <div className="w-8 h-8 border-2 border-sky-500 border-t-transparent rounded-full animate-spin" />
         </div>
       }
     >

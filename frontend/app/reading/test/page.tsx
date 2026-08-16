@@ -157,15 +157,15 @@ function ReadingTestContent() {
     };
   }, [isFreshRequest]);
 
-  // ── 2. Timer countdown ──
+  // ── 2. Timer Countdown ──
   useEffect(() => {
-    if (loading || submitting || !test) return;
+    if (loading || submitting) return;
 
     timerIdRef.current = setInterval(() => {
       setTimeLeft((prev) => {
         if (prev <= 1) {
           clearInterval(timerIdRef.current!);
-          handleSubmit(true); // Auto-submit when time reaches 0
+          handleSubmitTest(); // Auto submit when time runs out
           return 0;
         }
         return prev - 1;
@@ -175,11 +175,11 @@ function ReadingTestContent() {
     return () => {
       if (timerIdRef.current) clearInterval(timerIdRef.current);
     };
-  }, [loading, submitting, test]);
+  }, [loading, submitting]);
 
-  // ── 3. Autosave draft ──
+  // ── 3. Auto-save draft to sessionStorage (debounced) ──
   useEffect(() => {
-    if (!test || loading || submitting) return;
+    if (!test || loading) return;
 
     const timer = setTimeout(() => {
       safeSessionStorage.setItem("ielts_reading_draft", {
@@ -191,7 +191,7 @@ function ReadingTestContent() {
     }, AUTOSAVE_DEBOUNCE_MS);
 
     return () => clearTimeout(timer);
-  }, [test, answers, flags, timeLeft, loading, submitting]);
+  }, [test, answers, flags, timeLeft, loading]);
 
   // ── Handlers ──
   const handleAnswer = (qIdx: number, val: string) => {
@@ -207,46 +207,52 @@ function ReadingTestContent() {
     });
   };
 
-  const handleSelectQ = (qNum: number) => {
-    setActiveQ(qNum);
-
-    // Switch active passage tab if target question belongs to another passage
+  const handleSelectQ = (qIdx: number) => {
+    setActiveQ(qIdx);
+    // Switch active passage if the question belongs to another passage
     if (test) {
-      const targetPassageIdx = test.questions.find((q) => q.index === qNum)?.passageIndex;
-      if (typeof targetPassageIdx === "number" && targetPassageIdx !== activePassage) {
-        setActivePassage(targetPassageIdx);
+      const pIdx = test.passages.findIndex((p) => {
+        const [start, end] = p.questionRange || [1, 13];
+        return qIdx >= start && qIdx <= end;
+      });
+      if (pIdx !== -1 && pIdx !== activePassage) {
+        setActivePassage(pIdx);
       }
     }
   };
 
-  const handleNextQ = () => {
-    if (activeQ < 40) handleSelectQ(activeQ + 1);
-  };
-
   const handlePrevQ = () => {
-    if (activeQ > 1) handleSelectQ(activeQ - 1);
+    if (activeQ > 1) {
+      handleSelectQ(activeQ - 1);
+    }
   };
 
-  const handleSubmit = async (autoSubmit = false) => {
+  const handleNextQ = () => {
+    if (activeQ < 40) {
+      handleSelectQ(activeQ + 1);
+    }
+  };
+
+  // ── 4. Submit & Evaluate Test ──
+  const handleSubmitTest = async () => {
     if (!test || submitting) return;
     setSubmitting(true);
     setShowSubmitModal(false);
 
-    const timeTaken = Math.max(1, Math.floor((Date.now() - startTimeRef.current) / 1000));
-
-    // Convert numeric keys to string keys for API payload
-    const strAnswers: Record<string, string> = {};
-    Object.entries(answers).forEach(([k, v]) => {
-      strAnswers[k] = v;
-    });
-
     try {
-      // Evaluate results
+      const timeTaken = TOTAL_SECONDS - timeLeft;
+      const strAnswers: Record<string, string> = {};
+      Object.entries(answers).forEach(([k, v]) => {
+        strAnswers[k] = v;
+      });
+
+      // Grade test locally / evaluate with AI recommendations
       const results = await withTimeout(
         evaluateReadingTest({
-          answers: strAnswers,
-          timeTakenSeconds: timeTaken,
           test,
+          answers: strAnswers,
+          userAnswers: strAnswers,
+          timeTakenSeconds: timeTaken,
         }),
         30000,
         "Evaluating test results..."
@@ -286,9 +292,9 @@ function ReadingTestContent() {
   // ── Render Loading state ──
   if (loading) {
     return (
-      <div className="min-h-screen bg-background flex flex-col items-center justify-center p-6 space-y-4 text-center">
-        <div className="w-12 h-12 rounded-full border-4 border-primary border-t-transparent animate-spin" />
-        <h2 className="text-xl font-bold text-foreground">Preparing your IELTS Reading Test...</h2>
+      <div className="min-h-screen bg-[#fbfcfd] dark:bg-background flex flex-col items-center justify-center p-6 space-y-4 text-center">
+        <div className="w-12 h-12 rounded-full border-4 border-sky-500 border-t-transparent animate-spin" />
+        <h2 className="text-xl font-bold text-slate-800 dark:text-slate-200">Preparing your IELTS Reading Test...</h2>
       </div>
     );
   }
@@ -305,35 +311,37 @@ function ReadingTestContent() {
   ).length;
 
   return (
-    <div className="h-screen bg-background flex flex-col overflow-hidden">
-      {/* ── TOP NAVIGATION BAR ── */}
-      <header className="px-3 sm:px-6 py-2 sm:py-2.5 border-b border-border bg-card flex items-center justify-between gap-2 sm:gap-4 shrink-0 shadow-sm overflow-x-auto scrollbar-none">
-        {/* Module Title Badge & Theme Toggler (matching Image #1) */}
-        <div className="flex items-center gap-2.5 sm:gap-3 bg-muted/30 px-3 py-2 rounded-2xl border border-border">
-          <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-2xl bg-primary text-primary-foreground flex items-center justify-center shrink-0">
-            <BookOpen className="w-4 h-4 sm:w-5 sm:h-5" />
+    <div className="h-screen bg-[#f8fafc] dark:bg-background flex flex-col overflow-hidden">
+      {/* ── TOP FLOATING HEADER (3 Separate Cards) ── */}
+      <header className="px-4 sm:px-6 pt-3 pb-2 flex flex-col md:flex-row md:items-center justify-between gap-4 shrink-0 overflow-x-auto scrollbar-none">
+        {/* Left Card: Brand Badge + Progress + Theme Toggler */}
+        <div className="flex items-center gap-3 bg-white dark:bg-card px-4 py-2.5 rounded-2xl border border-slate-200/80 dark:border-border/60 shadow-sm shrink-0">
+          <div className="w-9 h-9 rounded-xl bg-[#0284c7] text-white flex items-center justify-center shrink-0 shadow-sm">
+            <BookOpen className="w-4 h-4" />
           </div>
           <div>
-            <h1 className="text-xs sm:text-sm font-bold text-foreground leading-tight">IELTS Reading</h1>
-            <div className="w-20 sm:w-24 h-1.5 bg-muted rounded-full overflow-hidden mt-1">
+            <h1 className="text-xs sm:text-sm font-bold text-slate-800 dark:text-slate-100 leading-tight">
+              IELTS Reading
+            </h1>
+            <div className="w-20 sm:w-24 h-1.5 bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden mt-1">
               <div
-                className="h-full bg-primary transition-all duration-300"
+                className="h-full bg-[#0284c7] transition-all duration-300"
                 style={{ width: `${(totalAnsweredCount / 40) * 100}%` }}
               />
             </div>
-            <span className="text-[10px] text-muted-foreground font-semibold">
+            <span className="text-[10px] text-slate-400 dark:text-slate-500 font-semibold">
               {totalAnsweredCount}/40
             </span>
           </div>
 
           {/* Theme Toggler Button */}
-          <div className="ml-1 pl-2 border-l border-border">
-            <AnimatedThemeToggler className="w-8 h-8 rounded-full border border-border bg-card flex items-center justify-center text-foreground hover:bg-muted transition-colors" />
+          <div className="ml-1 pl-2 border-l border-slate-200 dark:border-slate-800">
+            <AnimatedThemeToggler className="w-8 h-8 rounded-full border border-slate-200 dark:border-slate-700 bg-white dark:bg-card flex items-center justify-center text-slate-600 dark:text-slate-300 hover:bg-slate-50 transition-colors" />
           </div>
         </div>
 
-        {/* Passage Selector Tabs */}
-        <div className="flex-1 min-w-[240px] max-w-xl">
+        {/* Center Card: Passage Tabs */}
+        <div className="flex-1 max-w-xl">
           <PassageTabs
             passages={test.passages}
             activePassage={activePassage}
@@ -346,19 +354,21 @@ function ReadingTestContent() {
           />
         </div>
 
-        {/* Timer */}
-        <ReadingTimer secondsLeft={timeLeft} />
+        {/* Right Card: Timer */}
+        <div className="shrink-0">
+          <ReadingTimer secondsLeft={timeLeft} />
+        </div>
       </header>
 
       {/* ── MOBILE VIEW TOGGLE (visible only on screens < lg) ── */}
-      <div className="lg:hidden flex border-b border-border bg-muted/20 px-4 py-2 gap-2">
+      <div className="lg:hidden flex border-b border-slate-200/80 dark:border-border/60 bg-white dark:bg-card px-4 py-2 gap-2">
         <button
           type="button"
           onClick={() => setMobileView("passage")}
           className={`flex-1 py-2 text-xs font-bold rounded-xl border flex items-center justify-center gap-1.5 transition-all ${
             mobileView === "passage"
-              ? "bg-primary text-primary-foreground border-primary shadow"
-              : "bg-card text-muted-foreground border-border"
+              ? "bg-[#0284c7] text-white border-[#0284c7] shadow"
+              : "bg-white dark:bg-card text-slate-500 border-slate-200 dark:border-border"
           }`}
         >
           <FileText className="w-3.5 h-3.5" />
@@ -369,8 +379,8 @@ function ReadingTestContent() {
           onClick={() => setMobileView("questions")}
           className={`flex-1 py-2 text-xs font-bold rounded-xl border flex items-center justify-center gap-1.5 transition-all ${
             mobileView === "questions"
-              ? "bg-primary text-primary-foreground border-primary shadow"
-              : "bg-card text-muted-foreground border-border"
+              ? "bg-[#0284c7] text-white border-[#0284c7] shadow"
+              : "bg-white dark:bg-card text-slate-500 border-slate-200 dark:border-border"
           }`}
         >
           <HelpCircle className="w-3.5 h-3.5" />
@@ -379,7 +389,7 @@ function ReadingTestContent() {
       </div>
 
       {/* ── MAIN WORKSPACE (SPLIT PANE on lg+, TABBED on mobile) ── */}
-      <main className="flex-1 min-h-0 grid grid-cols-1 lg:grid-cols-12 gap-4 p-3 sm:p-4 overflow-hidden">
+      <main className="flex-1 min-h-0 grid grid-cols-1 lg:grid-cols-12 gap-4 px-4 sm:px-6 py-2 overflow-hidden">
         {/* Left Pane — Passage Reader */}
         <section
           className={`lg:col-span-7 h-full min-h-0 ${
@@ -418,74 +428,92 @@ function ReadingTestContent() {
       </main>
 
       {/* ── BOTTOM ACTION BAR ── */}
-      <footer className="px-3 sm:px-6 py-2.5 sm:py-3 border-t border-border bg-card flex items-center justify-between gap-2 sm:gap-4 shrink-0 shadow-md">
+      <footer className="px-4 sm:px-6 py-2.5 border-t border-slate-200/80 dark:border-border/60 bg-white dark:bg-card flex items-center justify-between gap-2 sm:gap-4 shrink-0 shadow-sm">
         <Button
           variant="outline"
           size="sm"
-          className="h-9 sm:h-10 rounded-xl px-3 sm:px-4 text-xs sm:text-sm"
+          className="h-9 sm:h-10 rounded-full px-4 sm:px-5 text-xs font-semibold border-slate-200 text-slate-600 hover:bg-slate-50"
           disabled={activeQ <= 1}
           onClick={handlePrevQ}
         >
-          <ChevronLeft className="w-4 h-4 sm:mr-1" />
-          <span className="hidden sm:inline">Previous</span>
+          <ChevronLeft className="w-4 h-4 mr-1" />
+          Previous
         </Button>
 
-        <div className="flex items-center gap-2 sm:gap-3">
-          <span className="text-xs font-semibold text-muted-foreground">
+        <div className="flex items-center gap-3 sm:gap-4">
+          <span className="text-xs font-bold text-slate-400 dark:text-slate-500">
             Q{activeQ} of 40
           </span>
 
           <Button
             variant="outline"
             size="sm"
-            className={`h-9 sm:h-10 rounded-xl px-3 sm:px-4 text-xs sm:text-sm ${
+            className={`h-9 rounded-full px-4 text-xs font-semibold border-slate-200 text-slate-600 hover:bg-slate-50 ${
               flags.has(activeQ)
-                ? "bg-amber-500/10 border-amber-500/30 text-amber-600 dark:text-amber-400"
+                ? "bg-amber-50 border-amber-300 text-amber-600 dark:text-amber-400"
                 : ""
             }`}
             onClick={() => toggleFlag(activeQ)}
           >
-            <Flag className="w-3.5 h-3.5 sm:mr-1.5" />
-            <span className="hidden sm:inline">{flags.has(activeQ) ? "Flagged" : "Flag"}</span>
+            <Flag className="w-3.5 h-3.5 mr-1.5 text-slate-400" />
+            <span>{flags.has(activeQ) ? "Flagged" : "Flag"}</span>
           </Button>
 
           <Button
-            className="h-9 sm:h-10 rounded-xl px-4 sm:px-6 text-xs sm:text-sm bg-primary"
+            size="sm"
+            className="h-9 rounded-full px-6 text-xs font-bold bg-[#0284c7] hover:bg-[#0369a1] text-white shadow-[0_3px_12px_rgba(2,132,199,0.3)] transition-all"
             disabled={submitting}
             onClick={() => setShowSubmitModal(true)}
           >
             {submitting ? (
-              <Loader2 className="w-4 h-4 sm:mr-2 animate-spin" />
+              <Loader2 className="w-3.5 h-3.5 animate-spin mr-1.5" />
             ) : (
-              <Send className="w-4 h-4 sm:mr-2" />
+              <Send className="w-3.5 h-3.5 mr-1.5" />
             )}
-            Submit
+            <span>Submit</span>
           </Button>
         </div>
 
         <Button
           variant="outline"
           size="sm"
-          className="h-9 sm:h-10 rounded-xl px-3 sm:px-4 text-xs sm:text-sm"
+          className="h-9 sm:h-10 rounded-full px-4 sm:px-5 text-xs font-semibold border-slate-200 text-slate-600 hover:bg-slate-50"
           disabled={activeQ >= 40}
           onClick={handleNextQ}
         >
-          <span className="hidden sm:inline">Next</span>
-          <ChevronRight className="w-4 h-4 sm:ml-1" />
+          Next
+          <ChevronRight className="w-4 h-4 ml-1" />
         </Button>
       </footer>
 
-      {/* Submit confirmation modal */}
+      {/* ── Submit Confirmation Dialog ── */}
       <SubmitDialog
         open={showSubmitModal}
-        passages={test.passages}
-        answers={answers}
-        onClose={() => setShowSubmitModal(false)}
-        onConfirm={() => handleSubmit(false)}
+        totalAnswered={totalAnsweredCount}
+        totalQuestions={40}
+        flaggedCount={flags.size}
+        timeLeft={timeLeft}
+        isSubmitting={submitting}
+        onCancel={() => setShowSubmitModal(false)}
+        onConfirm={handleSubmitTest}
       />
 
-      {/* Error banner modal */}
-      <ErrorModal banner={banner} onClose={() => setBanner(null)} />
+      {/* ── Error Banner Modal ── */}
+      {banner && (
+        <ErrorModal
+          isOpen={true}
+          title={banner.title}
+          message={banner.message}
+          actionLabel={banner.actionLabel}
+          onAction={() => {
+            setBanner(null);
+            if (banner.actionLabel === "Retry Generation") {
+              window.location.reload();
+            }
+          }}
+          onClose={() => setBanner(null)}
+        />
+      )}
     </div>
   );
 }
@@ -494,9 +522,8 @@ export default function ReadingTestPage() {
   return (
     <Suspense
       fallback={
-        <div className="min-h-screen bg-background flex flex-col items-center justify-center p-6 text-center space-y-3">
-          <div className="w-10 h-10 rounded-full border-4 border-primary border-t-transparent animate-spin" />
-          <p className="text-sm text-muted-foreground font-medium">Loading reading test...</p>
+        <div className="min-h-screen bg-[#fbfcfd] dark:bg-background flex items-center justify-center">
+          <div className="w-8 h-8 border-2 border-sky-500 border-t-transparent rounded-full animate-spin" />
         </div>
       }
     >

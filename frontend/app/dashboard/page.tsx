@@ -1,134 +1,177 @@
 "use client";
 
-import { useSession } from "@/lib/auth-client";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Skeleton } from "@/components/ui/skeleton";
-import { trpc } from "@/server/client"; 
+import Link from "next/link";
+import { motion } from "motion/react";
+import {
+  FileText,
+  BookOpen,
+  BarChart3,
+  TrendingUp,
+  PenLine,
+  Headphones,
+  Mic,
+  ArrowRight,
+} from "lucide-react";
+import { Navbar } from "@/components/landing/navbar";
+import { Footer } from "@/components/landing/footer";
 
 export default function DashboardPage() {
-  const { data: session, isPending } = useSession();
-  const { data: users, isLoading: usersLoading } = trpc.user.me.useQuery();
+  const quickActions = [
+    {
+      title: "Recent Test",
+      subtitle: "View last result",
+      icon: FileText,
+      iconColor: "text-sky-500 dark:text-sky-400",
+      iconBg: "bg-sky-50 dark:bg-sky-950/60 border-sky-100 dark:border-sky-800",
+    },
+    {
+      title: "Start New Test",
+      subtitle: "Begin a module",
+      icon: BookOpen,
+      iconColor: "text-emerald-500 dark:text-emerald-400",
+      iconBg: "bg-emerald-50 dark:bg-emerald-950/60 border-emerald-100 dark:border-emerald-800",
+    },
+    {
+      title: "View Reports",
+      subtitle: "All results",
+      icon: BarChart3,
+      iconColor: "text-amber-500 dark:text-amber-400",
+      iconBg: "bg-amber-50 dark:bg-amber-950/60 border-amber-100 dark:border-amber-800",
+    },
+    {
+      title: "Progress",
+      subtitle: "Track scores",
+      icon: TrendingUp,
+      iconColor: "text-sky-500 dark:text-sky-400",
+      iconBg: "bg-sky-50 dark:bg-sky-950/60 border-sky-100 dark:border-sky-800",
+    },
+  ];
 
+  const testModules = [
+    {
+      title: "READING TEST",
+      description:
+        "3 passages, 40 questions across multiple question types. 60 minutes.",
+      icon: BookOpen,
+      href: "/reading",
+      badges: ["3 Passages", "40 Questions", "60 Minutes"],
+    },
+    {
+      title: "WRITING TEST",
+      description:
+        "2 writing tasks including report writing and essay composition. 60 minutes.",
+      icon: PenLine,
+      href: "/writing",
+      badges: ["2 Tasks", "400+ Words", "60 Minutes"],
+    },
+    {
+      title: "LISTENING TEST",
+      description:
+        "4 sections with audio playback, 40 questions across 6 question types. 30 minutes.",
+      icon: Headphones,
+      href: "/listening",
+      badges: ["4 Sections", "40 Questions", "30 Minutes"],
+    },
+    {
+      title: "SPEAKING TEST",
+      description:
+        "AI-powered conversational exam with 3 parts. Real-time voice interaction. 11-14 minutes.",
+      icon: Mic,
+      href: "/speaking",
+      badges: ["3 Parts", "AI Examiner", "14 Minutes"],
+    },
+  ];
 
   return (
-    <div className="container mx-auto py-10 px-4">
-      <h1 className="text-3xl font-bold tracking-tight mb-8">Dashboard</h1>
-      <div>{users ? `${users.name} is signed in` : "No user found"}</div>
-      
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-        <Card>
-          <CardHeader>
-            <CardTitle>Welcome Back!</CardTitle>
-            <CardDescription>Your current session details.</CardDescription>
-          </CardHeader>
-          <CardContent>
-            {isPending ? (
-              <div className="space-y-2">
-                <Skeleton className="h-4 w-[250px]" />
-                <Skeleton className="h-4 w-[200px]" />
+    <div className="min-h-screen flex flex-col bg-[#fbfcfd] dark:bg-background">
+      <Navbar />
+
+      <main className="flex-1 py-10 md:py-16 px-4 md:px-6">
+        <div className="container mx-auto">
+          {/* Header Section */}
+          <div className="text-center mb-8 md:mb-10 space-y-2">
+            <h1 className="text-2xl sm:text-3xl lg:text-[34px] font-black tracking-tight text-slate-900 dark:text-slate-100 uppercase">
+              SELECT TEST MODULE
+            </h1>
+            <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400">
+              Choose a module to begin your IELTS practice session.
+            </p>
+          </div>
+
+          {/* Top Quick Actions (4 Static Info Cards) */}
+          {/* <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4 mb-8 md:mb-10">
+            {quickActions.map((action, index) => (
+              <div
+                key={index}
+                className="bg-white dark:bg-card border border-slate-200/80 dark:border-border/60 rounded-2xl md:rounded-[22px] p-3.5 md:p-4 flex items-center gap-3 shadow-[0_2px_10px_rgba(0,0,0,0.02)] select-none"
+              >
+                <div
+                  className={`w-8 h-8 rounded-xl border flex items-center justify-center shrink-0 shadow-sm ${action.iconBg} ${action.iconColor}`}
+                >
+                  <action.icon className="h-4 w-4" />
+                </div>
+                <div className="overflow-hidden">
+                  <h3 className="font-bold text-xs md:text-sm text-slate-800 dark:text-slate-200 truncate">
+                    {action.title}
+                  </h3>
+                  <p className="text-[10px] md:text-xs text-slate-400 dark:text-slate-500 truncate">
+                    {action.subtitle}
+                  </p>
+                </div>
               </div>
-            ) : (
-              <div className="space-y-2">
-                <p><strong>Name:</strong> {session?.user?.name}</p>
-                <p><strong>Email:</strong> {session?.user?.email}</p>
-                <p><strong>Role:</strong> {(session?.user as any)?.role || "User"}</p>
-              </div>
-            )}
-          </CardContent>
-        </Card>
+            ))}
+          </div> */}
 
-        {/* Reading Module Card */}
-        <Card className="hover:shadow-md transition-shadow border-primary/20 bg-primary/5">
-          <CardHeader>
-            <CardTitle className="flex items-center justify-between">
-              <span>📖 Reading Test</span>
-              <span className="text-xs px-2.5 py-0.5 rounded-full bg-primary text-primary-foreground font-bold">
-                60 Min
-              </span>
-            </CardTitle>
-            <CardDescription>
-              Take a full 3-passage IELTS Academic Reading test (40 questions).
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <a
-              href="/reading"
-              className="inline-flex items-center justify-center w-full h-10 rounded-xl bg-primary text-primary-foreground font-semibold text-sm hover:opacity-90 transition-opacity"
-            >
-              Start Reading Test →
-            </a>
-          </CardContent>
-        </Card>
+          {/* 2x2 Test Modules Grid */}
+          <div id="test-modules" className="grid grid-cols-1 md:grid-cols-2 gap-5 md:gap-6 scroll-mt-24">
+            {testModules.map((module, index) => (
+              <motion.div
+                key={index}
+                initial={{ opacity: 0, y: 15 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.4, delay: index * 0.08 }}
+              >
+                <Link
+                  href={module.href}
+                  className="group bg-white dark:bg-card border border-slate-200/80 dark:border-border/60 rounded-[24px] md:rounded-[28px] p-6 md:p-7 shadow-[0_2px_12px_rgba(0,0,0,0.02)] hover:shadow-md hover:border-sky-200 dark:hover:border-sky-800 transition-all flex flex-col justify-between h-full"
+                >
+                  <div>
+                    {/* Top Row: Icon + Arrow */}
+                    <div className="flex items-center justify-between">
+                      <div className="w-9 h-9 rounded-xl bg-sky-50 dark:bg-sky-950/60 border border-sky-100 dark:border-sky-800 flex items-center justify-center text-sky-500 dark:text-sky-400 shadow-sm">
+                        <module.icon className="h-4.5 w-4.5" />
+                      </div>
+                      <ArrowRight className="h-4 w-4 text-slate-300 dark:text-slate-600 group-hover:text-sky-500 group-hover:translate-x-1 transition-all" />
+                    </div>
 
-        {/* Writing Module Card */}
-        <Card className="hover:shadow-md transition-shadow border-border">
-          <CardHeader>
-            <CardTitle className="flex items-center justify-between">
-              <span>✍️ Writing Test</span>
-              <span className="text-xs px-2.5 py-0.5 rounded-full bg-muted text-muted-foreground font-bold">
-                60 Min
-              </span>
-            </CardTitle>
-            <CardDescription>
-              Task 1 (Report/Letter) & Task 2 (Essay) with AI band scoring.
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <a
-              href="/writing"
-              className="inline-flex items-center justify-center w-full h-10 rounded-xl bg-muted text-foreground font-semibold text-sm hover:bg-muted/80 transition-colors"
-            >
-              Start Writing Test →
-            </a>
-          </CardContent>
-        </Card>
+                    {/* Title & Description */}
+                    <h2 className="text-sm md:text-base font-black tracking-wide text-slate-900 dark:text-slate-100 uppercase mt-4 mb-2">
+                      {module.title}
+                    </h2>
+                    <p className="text-xs text-slate-500 dark:text-slate-400 leading-relaxed mb-6">
+                      {module.description}
+                    </p>
+                  </div>
 
-        {/* Speaking Module Card */}
-        <Card className="hover:shadow-md transition-shadow border-border">
-          <CardHeader>
-            <CardTitle className="flex items-center justify-between">
-              <span>🎙️ Speaking Test</span>
-              <span className="text-xs px-2.5 py-0.5 rounded-full bg-muted text-muted-foreground font-bold">
-                11-14 Min
-              </span>
-            </CardTitle>
-            <CardDescription>
-              Live voice interview with AI Examiner (Parts 1, 2, & 3).
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <a
-              href="/speaking/test"
-              className="inline-flex items-center justify-center w-full h-10 rounded-xl bg-muted text-foreground font-semibold text-sm hover:bg-muted/80 transition-colors"
-            >
-              Start Speaking Test →
-            </a>
-          </CardContent>
-        </Card>
+                  {/* Bottom Pill Badges */}
+                  <div className="flex flex-wrap items-center gap-2 pt-2">
+                    {module.badges.map((badge, bIdx) => (
+                      <span
+                        key={bIdx}
+                        className="px-2.5 py-1 text-[10px] font-medium text-sky-600 dark:text-sky-400 bg-sky-50 dark:bg-sky-950/50 border border-sky-100 dark:border-sky-800 rounded-full"
+                      >
+                        {badge}
+                      </span>
+                    ))}
+                  </div>
+                </Link>
+              </motion.div>
+            ))}
+          </div>
+        </div>
+      </main>
 
-        {/* Listening Module Card */}
-        <Card className="hover:shadow-md transition-shadow border-border">
-          <CardHeader>
-            <CardTitle className="flex items-center justify-between">
-              <span>🎧 Listening Test</span>
-              <span className="text-xs px-2.5 py-0.5 rounded-full bg-muted text-muted-foreground font-bold">
-                30 Min
-              </span>
-            </CardTitle>
-            <CardDescription>
-              Listen to 4 sections and answer 40 questions with AI scoring.
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <a
-              href="/listening"
-              className="inline-flex items-center justify-center w-full h-10 rounded-xl bg-muted text-foreground font-semibold text-sm hover:bg-muted/80 transition-colors"
-            >
-              Start Listening Test →
-            </a>
-          </CardContent>
-        </Card>
-      </div>
+      <Footer />
     </div>
   );
 }

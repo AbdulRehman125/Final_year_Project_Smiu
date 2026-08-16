@@ -76,7 +76,8 @@ export interface ListeningEvaluationResponse {
 }
 
 export interface ListeningSubmitPayload {
-  answers: Record<string, string>;
+  answers?: Record<string, string>;
+  userAnswers?: Record<string, string>;
   timeTakenSeconds: number;
   test: ListeningTest;
 }
