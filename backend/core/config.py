@@ -164,6 +164,7 @@ class Settings(BaseSettings):
     ALLOWED_ORIGINS: List[str] = [
         "http://localhost:3000",
         "http://localhost:3001",
+        "https://final-year-project-smiu-ym7k.vercel.app",
     ]
 
     LLM_MODEL: str = "llama-3.3-70b-versatile"
