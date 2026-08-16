@@ -19,9 +19,9 @@ export function Hero() {
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5 }}
             >
-              <Badge variant="secondary" className="mb-4 text-primary bg-primary/10 hover:bg-primary/20 border-primary/20">
+              {/* <Badge variant="secondary" className="mb-4 text-primary bg-primary/10 hover:bg-primary/20 border-primary/20">
                 🚀 #1 AI-Powered IELTS Practice App
-              </Badge>
+              </Badge> */}
               <h1 className="text-4xl md:text-5xl lg:text-6xl font-extrabold tracking-tight mb-6 leading-tight">
                 MASTER IELTS <br />
                 <span className="text-primary">WITH AI-POWERED PRACTICE</span>
