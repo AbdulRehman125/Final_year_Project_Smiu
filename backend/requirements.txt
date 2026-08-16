@@ -39,3 +39,4 @@ loguru
 # JSON
 orjson
 edge-tts
+cloudinary
