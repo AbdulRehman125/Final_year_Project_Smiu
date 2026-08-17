@@ -84,18 +84,6 @@ def get_llm_max_tokens(default_override: Optional[int] = None) -> int:
     return getattr(settings, "LLM_MAX_TOKENS", 2000)
 
 
-# def get_llm_temperature(default_override: Optional[float] = None) -> float:
-#     """Returns DB temperature if present, otherwise falls back to backend .env LLM_TEMPERATURE"""
-#     if default_override is not None:
-#         return default_override
-#     live = fetch_live_settings()
-#     val = live.get("LLM_TEMPERATURE")
-#     if val and str(val).strip():
-#         try:
-#             return float(val)
-#         except (ValueError, TypeError):
-#             pass
-#     return getattr(settings, "LLM_TEMPERATURE", 0.2)
 
 
 def get_llm_temperature(default_override: Optional[float] = None) -> float:
