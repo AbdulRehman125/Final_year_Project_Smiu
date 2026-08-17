@@ -2115,10 +2115,53 @@ class SpeakingAgent:
             messages.append({"role": role, "content": msg.content})
         return messages
 
+    # def _call_llm(self, messages: List[dict], temperature: float = 0.7,
+    #               max_tokens: int = 300) -> str:
+    #     """Sync Groq call with retry + backoff on transient rate limits.
+    #     Safe to block here — this always runs inside asyncio.to_thread()."""
+    #     last_error: Optional[Exception] = None
+    #     client = get_raw_groq_client()
+    #     model_name = get_llm_model()
+
+    #     for attempt in range(_MAX_LLM_RETRIES):
+    #         try:
+    #             response = client.chat.completions.create(
+    #                 model=model_name,
+    #                 messages=messages,
+    #                 temperature=temperature,
+    #                 max_tokens=max_tokens,
+    #             )
+    #             return response.choices[0].message.content.strip()
+
+    #         except Exception as e:
+    #             last_error = e
+    #             is_rate_limit = any(marker in str(e).lower() for marker in _RATE_LIMIT_MARKERS)
+
+    #             if not is_rate_limit:
+    #                 logger.error(f"Speaking LLM call failed (non-rate-limit): {e}")
+    #                 raise
+
+    #             if attempt < _MAX_LLM_RETRIES - 1:
+    #                 wait = _RETRY_BACKOFF_SECONDS[attempt]
+    #                 logger.warning(
+    #                     f"Groq rate limit hit (attempt {attempt + 1}/{_MAX_LLM_RETRIES}), "
+    #                     f"retrying in {wait}s..."
+    #                 )
+    #                 time.sleep(wait)
+    #             else:
+    #                 logger.error(f"Groq rate limit persisted after {_MAX_LLM_RETRIES} attempts: {e}")
+
+    #     raise RateLimitExceededError(
+    #         "Our AI examiner is experiencing high demand right now. "
+    #         "Please wait a minute and try again."
+    #     ) from last_error
+    
+    
     def _call_llm(self, messages: List[dict], temperature: float = 0.7,
                   max_tokens: int = 300) -> str:
-        """Sync Groq call with retry + backoff on transient rate limits.
-        Safe to block here — this always runs inside asyncio.to_thread()."""
+        """Sync Groq call with retry + backoff on transient rate limits AND
+        empty/blank responses. Safe to block here — always runs inside
+        asyncio.to_thread()."""
         last_error: Optional[Exception] = None
         client = get_raw_groq_client()
         model_name = get_llm_model()
@@ -2131,13 +2174,33 @@ class SpeakingAgent:
                     temperature=temperature,
                     max_tokens=max_tokens,
                 )
-                return response.choices[0].message.content.strip()
+
+                content = response.choices[0].message.content
+                content = content.strip() if content else ""
+
+                # An empty completion is a transient failure, not a valid
+                # examiner turn — sending "" to the client renders a blank
+                # question bubble. Retry instead of returning empty.
+                if not content:
+                    logger.warning(
+                        f"LLM returned empty content "
+                        f"(attempt {attempt + 1}/{_MAX_LLM_RETRIES}), retrying..."
+                    )
+                    if attempt < _MAX_LLM_RETRIES - 1:
+                        time.sleep(_RETRY_BACKOFF_SECONDS[attempt])
+                        continue
+                    raise RuntimeError("LLM returned empty content after retries")
+
+                return content
 
             except Exception as e:
                 last_error = e
                 is_rate_limit = any(marker in str(e).lower() for marker in _RATE_LIMIT_MARKERS)
 
                 if not is_rate_limit:
+                    if isinstance(e, RuntimeError) and "empty content" in str(e):
+                        logger.error("LLM produced only empty responses across all retries")
+                        raise
                     logger.error(f"Speaking LLM call failed (non-rate-limit): {e}")
                     raise
 

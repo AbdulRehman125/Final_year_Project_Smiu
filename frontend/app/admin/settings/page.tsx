@@ -28,7 +28,6 @@ const POPULAR_MODELS = [
   { value: "llama-3.3-70b-versatile", label: "Llama 3.3 70B Versatile" },
   { value: "llama3-70b-8192", label: "Llama 3 70B 8192" },
   { value: "mixtral-8x7b-32768", label: "Mixtral 8x7B (32k Context)" },
-  { value: "llama-3.1-8b-instant", label: "Llama 3.1 8B Instant" },
   { value: "custom", label: "Custom Model..." },
 ];
 

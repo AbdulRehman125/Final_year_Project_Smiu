@@ -63,7 +63,7 @@ def get_llm_model(default_override: Optional[str] = None) -> str:
     model = live.get("LLM_MODEL")
     if model and isinstance(model, str) and model.strip():
         return model.strip()
-    return getattr(settings, "LLM_MODEL", "llama-3.3-70b-versatile")
+    return getattr(settings, "LLM_MODEL", "openai/gpt-oss-120bs")
 
 
 def get_llm_max_tokens(default_override: Optional[int] = None) -> int:
@@ -72,7 +72,11 @@ def get_llm_max_tokens(default_override: Optional[int] = None) -> int:
         return default_override
     live = fetch_live_settings()
     val = live.get("LLM_MAX_TOKENS")
-    if val and str(val).strip():
+    # if val and str(val).strip():
+    #     try:
+    #         return int(val)
+    #     except (ValueError, TypeError):
+    if val is not None and str(val).strip() != "":
         try:
             return int(val)
         except (ValueError, TypeError):
@@ -80,19 +84,31 @@ def get_llm_max_tokens(default_override: Optional[int] = None) -> int:
     return getattr(settings, "LLM_MAX_TOKENS", 2000)
 
 
+# def get_llm_temperature(default_override: Optional[float] = None) -> float:
+#     """Returns DB temperature if present, otherwise falls back to backend .env LLM_TEMPERATURE"""
+#     if default_override is not None:
+#         return default_override
+#     live = fetch_live_settings()
+#     val = live.get("LLM_TEMPERATURE")
+#     if val and str(val).strip():
+#         try:
+#             return float(val)
+#         except (ValueError, TypeError):
+#             pass
+#     return getattr(settings, "LLM_TEMPERATURE", 0.2)
+
+
 def get_llm_temperature(default_override: Optional[float] = None) -> float:
-    """Returns DB temperature if present, otherwise falls back to backend .env LLM_TEMPERATURE"""
     if default_override is not None:
         return default_override
     live = fetch_live_settings()
     val = live.get("LLM_TEMPERATURE")
-    if val and str(val).strip():
+    if val is not None and str(val).strip() != "":
         try:
             return float(val)
         except (ValueError, TypeError):
             pass
     return getattr(settings, "LLM_TEMPERATURE", 0.2)
-
 
 def get_chat_groq(
     model: Optional[str] = None,
