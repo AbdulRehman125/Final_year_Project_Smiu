@@ -422,7 +422,7 @@ export function Modules() {
               {/* Action Button */}
               <div className="pt-2">
                 <Link
-                  href="/speaking"
+                  href="/speaking/test"
                   className="inline-flex items-center gap-2 bg-[#0284c7] hover:bg-[#0369a1] text-white font-semibold text-xs md:text-sm px-6 py-2.5 rounded-full shadow-[0_4px_14px_rgba(2,132,199,0.25)] transition-all hover:shadow-lg"
                 >
                   Try Speaking Test <ArrowRight className="h-4 w-4" />
