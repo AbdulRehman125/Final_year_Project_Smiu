@@ -20,6 +20,7 @@ import { PassageTabs } from "@/components/reading/passage-tabs";
 import { ReadingTimer } from "@/components/reading/reading-timer";
 import { SubmitDialog } from "@/components/reading/submit-dialog";
 import { ErrorModal } from "@/components/writing/error-modal";
+import type { Banner } from "@/lib/reading-network-utils";
 
 const TOTAL_SECONDS = 3600; // 60 minutes
 const AUTOSAVE_DEBOUNCE_MS = 1200;
@@ -33,8 +34,8 @@ function ReadingTestContent() {
   const [test, setTest] = useState<ReadingTest | null>(null);
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
-  const [banner, setBanner] = useState<any | null>(null);
-
+  // const [banner, setBanner] = useState<any | null>(null);
+ const [banner, setBanner] = useState<Banner | null>(null);
   // Mobile view tab ("passage" | "questions")
   const [mobileView, setMobileView] = useState<"passage" | "questions">("passage");
 
@@ -155,7 +156,17 @@ function ReadingTestContent() {
         }
       } catch (err) {
         if (isMounted) {
-          setBanner(describeError(err, "load"));
+          // setBanner(describeError(err, "load"));
+          setBanner({
+  ...describeError(err, "load"),
+  action: {
+    label: "Retry",
+    run: () => {
+      setBanner(null);
+      window.location.reload();
+    },
+  },
+});
           setLoading(false);
         }
       }
@@ -510,7 +521,7 @@ function ReadingTestContent() {
       />
 
       {/* ── Error Banner Modal ── */}
-      {banner && (
+      {/* {banner && (
         <ErrorModal
           isOpen={true}
           title={banner.title}
@@ -524,7 +535,8 @@ function ReadingTestContent() {
           }}
           onClose={() => setBanner(null)}
         />
-      )}
+      )} */}
+      <ErrorModal banner={banner} onClose={() => setBanner(null)} />
     </div>
   );
 }

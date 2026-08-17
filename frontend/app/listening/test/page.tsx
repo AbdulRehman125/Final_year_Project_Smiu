@@ -46,6 +46,7 @@ import { SectionTabs } from "@/components/listening/section-tabs";
 import { ListeningTimer } from "@/components/listening/listening-timer";
 import { SubmitDialog } from "@/components/listening/submit-dialog";
 import { ErrorModal } from "@/components/writing/error-modal";
+import type { Banner } from "@/lib/reading-network-utils";
 
 const TOTAL_SECONDS = 1800; // 30 minutes
 const AUTOSAVE_DEBOUNCE_MS = 1200;
@@ -59,8 +60,8 @@ function ListeningTestContent() {
   const [test, setTest] = useState<ListeningTest | null>(null);
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
-  const [banner, setBanner] = useState<any | null>(null);
-
+  // const [banner, setBanner] = useState<any | null>(null);
+  const [banner, setBanner] = useState<Banner | null>(null);
   // Mobile view tab ("audio" | "questions")
   const [mobileView, setMobileView] = useState<"audio" | "questions">("audio");
 
@@ -177,25 +178,55 @@ function ListeningTestContent() {
         // Save to DB in background if generated via AI
         if (generateWithAI && newTest) {
           try {
+            // saveTestMutation.mutate({
+            //   title: newTest.title,
+            //   difficulty: newTest.difficulty,
+            //   sections: newTest.sections,
+            //   questions: newTest.questions,
+            //   topics: newTest.topics,
+            //   totalQuestions: newTest.totalQuestions,
+            //   audioUrls: newTest.audioUrls,
+            // });
+
             saveTestMutation.mutate({
-              title: newTest.title,
-              difficulty: newTest.difficulty,
-              sections: newTest.sections,
-              questions: newTest.questions,
-              topics: newTest.topics,
-              totalQuestions: newTest.totalQuestions,
-              audioUrls: newTest.audioUrls,
-            });
+  title: newTest.title,
+  difficulty: newTest.difficulty,
+  sections: newTest.sections,
+  questions: newTest.questions,
+  topics: newTest.topics,
+  totalQuestions: newTest.totalQuestions,
+  audioUrls: newTest.audioUrls,
+  transcripts: newTest.sections.reduce((acc, s, i) => {
+    acc[i] = s.transcript ?? "";
+    return acc;
+  }, {} as Record<number, string>),
+});
           } catch {
             /* background save ignore */
           }
         }
+      // } catch (err) {
+      //   if (isMounted) {
+      //     setBanner(describeError(err, "load"));
+      //     setLoading(false);
+      //   }
+      // }
+
       } catch (err) {
-        if (isMounted) {
-          setBanner(describeError(err, "load"));
-          setLoading(false);
-        }
-      }
+  if (isMounted) {
+    setBanner({
+      ...describeError(err, "load"),
+      action: {
+        label: "Retry Generation",
+        run: () => {
+          setBanner(null);
+          window.location.reload();
+        },
+      },
+    });
+    setLoading(false);
+  }
+}
     }
 
     initTest();
@@ -331,10 +362,23 @@ function ListeningTestContent() {
 
       // Replace route so back button doesn't land back in submitted test state
       router.replace("/listening/results");
+    // } catch (err) {
+    //   setSubmitting(false);
+    //   setBanner(describeError(err, "submit"));
+    // }
     } catch (err) {
-      setSubmitting(false);
-      setBanner(describeError(err, "submit"));
-    }
+  setSubmitting(false);
+  setBanner({
+    ...describeError(err, "submit"),
+    action: {
+      label: "Retry",
+      run: () => {
+        setBanner(null);
+        handleSubmitTest(); // dobara submit try karo, reload ki zaroorat nahi
+      },
+    },
+  });
+}
   };
 
   // ── Render Loading state ──
@@ -669,7 +713,7 @@ function ListeningTestContent() {
       />
 
       {/* ── Error Banner Modal ── */}
-      {banner && (
+      {/* {banner && (
         <ErrorModal
           isOpen={true}
           title={banner.title}
@@ -683,7 +727,9 @@ function ListeningTestContent() {
           }}
           onClose={() => setBanner(null)}
         />
-      )}
+      )} */}
+
+      <ErrorModal banner={banner} onClose={() => setBanner(null)} />
     </div>
   );
 }

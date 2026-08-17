@@ -419,16 +419,17 @@ function ListeningResultsContent() {
                     <span className="text-slate-400 font-bold text-[11px]">
                       {qt.correct}/{qt.total}{" "}
                       <span className="text-slate-500 font-semibold">
-                        ({qt.percentage.toFixed(0)}%)
+                        {/* ({qt.percentage.toFixed(0)}%) */}
+                        ({(qt.percentage ?? 0).toFixed(0)}%)
                       </span>
                     </span>
                   </div>
                   <div className="w-full bg-slate-100 dark:bg-slate-800 rounded-full h-1.5 overflow-hidden">
                     <div
-                      className={`h-full rounded-full transition-all duration-700 ${
-                        qt.percentage >= 60 ? "bg-sky-500" : "bg-rose-500"
-                      }`}
-                      style={{ width: `${qt.percentage}%` }}
+                       className={`h-full rounded-full transition-all duration-700 ${
+      (qt.percentage ?? 0) >= 60 ? "bg-sky-500" : "bg-rose-500"
+    }`}
+    style={{ width: `${qt.percentage ?? 0}%` }}     
                     />
                   </div>
                 </div>
