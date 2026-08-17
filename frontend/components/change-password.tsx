@@ -73,7 +73,7 @@ function SetPassword({ className }: { className?: string }) {
   const handleSetPassword = () => {
     if (!session) return
 
-    requestPasswordReset({ email: session.user.email })
+    requestPasswordReset({ email: session.user.email ,redirectTo: "/auth/reset-password"})
   }
 
   return (

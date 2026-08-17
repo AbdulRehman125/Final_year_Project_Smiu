@@ -44,7 +44,7 @@ export function ForgotPassword({ className }: ForgotPasswordProps) {
     const formData = new FormData(e.currentTarget)
     const promise = requestPasswordReset({ 
       email: formData.get("email") as string,
-      redirectTo: "/reset-password"
+      redirectTo: "/auth/reset-password"
     })
 
     toast.promise(promise, {
