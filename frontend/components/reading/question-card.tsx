@@ -39,7 +39,7 @@ export function QuestionCard({
   };
 
   return (
-    <div className="bg-white dark:bg-card border border-slate-200/80 dark:border-border/60 rounded-[24px] p-6 sm:p-7 shadow-sm space-y-5 h-full flex flex-col justify-start">
+    <div className="bg-white overflow-y-auto dark:bg-card border border-slate-200/80 dark:border-border/60 rounded-[24px] p-6 sm:p-7 shadow-sm space-y-5 h-full flex flex-col justify-start">
       {/* Header Row: Question Number + Question Type Pill */}
       <div className="flex items-center gap-3">
         <div className="w-7 h-7 rounded-full bg-[#0284c7] text-white flex items-center justify-center font-bold text-xs shadow-sm shrink-0">
